@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insult to Compliment Translator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px 25px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  h1 { font-size: 24px; margin-bottom: 5px; }
+  p.subtitle {
+    opacity: 0.8;
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: left;
+    background: rgba(0,0,0,0.2);
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+  p.subtitle b { color: #7bdcff; }
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    margin-bottom: 15px;
+    background: #16323f;
+    color: #fff;
+    resize: vertical;
+    font-family: inherit;
+  }
+  button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,114,255,0.4);
+    transition: transform 0.15s ease;
+  }
+  button:active { transform: scale(0.96); }
+  .result {
+    margin-top: 22px;
+    min-height: 90px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 18px;
+    font-size: 17px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .footer-btns { display: flex; gap: 10px; margin-top: 15px; }
+  .footer-btns button {
+    flex: 1;
+    font-size: 14px;
+    padding: 10px;
+    background: rgba(255,255,255,0.12);
+    box-shadow: none;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .pop { animation: pop 0.25s ease; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🔄 Insult ↔ Compliment Translator</h1>
+  <p class="subtitle">
+    Kuch bhi negative line likho, tool usko funny <b>backhanded compliment</b> mein badal dega (sweet + thoda taunt mixed).<br><br>
+    Kaise type karein — examples:<br>
+    • <b>"tum bohat slow ho"</b><br>
+    • <b>"tum pagal ho"</b><br>
+    • <b>"itna bakwaas kaam kiya"</b><br>
+    • <b>"tum kamzor ho"</b><br>
+    Bas aise hi koi bhi sentence likho aur Translate dabao.
+  </p>
+
+  <textarea id="inputText" placeholder="Yahan kuch likho... jaise 'tum bohat slow ho'"></textarea>
+
+  <button onclick="translateText()">Translate Karo</button>
+
+  <div class="result" id="result">Kuch type karo aur tap karo 👆</div>
+
+  <div class="footer-btns">
+    <button onclick="speakResult()">🔊 Speak It</button>
+    <button onclick="copyResult()">📋 Copy</button>
+  </div>
+</div>
+
+<script>
+// Direct known insult -> backhanded/roast-style compliment swaps
+const insultToCompliment = [
+  { key: "slow", out: [
+    "itni slow speed hai ke GPS bhi tumhara route recalculate kar deta hai — lekin destination pe pohanch ke rehte ho, that's dedication.",
+    "tumhari speed dekh kar snail retire hone ki soch raha hai, par tum jo bhi karte ho pura karte ho.",
+    "tum itni careful chalte ho ke time slow ho jata hai, respect for the patience though.",
+    "traffic bhi tumse fast hai, lekin tumhari consistency undeniable hai.",
+    "tum jaldi mein nahi ho isliye galti bhi kam karte ho, silver lining hai ye.",
+    "tumhari pace dekh kar lagta hai time khud ruk gaya, par result to aata hi hai.",
+    "tum kachwe se race lo toh shayad tie ho, lekin finish line tak pohanchte ho zaroor.",
+    "tumhari slow-mo life mein bhi ek scene hota hai, thoda dramatic hi sahi.",
+    "tumhari speed itni relaxed hai ke Netflix bhi buffer ho jaye tumse pehle, par patience ka award tumhara.",
+    "tum time ke sath nahi, apne sath chalte ho — dedication level unmatched."
+  ] },
+  { key: "buddu", out: [
+    "itne simple ho ke logon ko lagta hai overacting kar rahe ho, par asal mein genuine ho.",
+    "tumhari simplicity dekh kar lagta hai phone manual bhi tumse easy hoga, par dil sacha hai tumhara.",
+    "tum itne straightforward ho ke drama serials bhi tumse boring lagte hain, honesty ka award tumhara.",
+    "tumhari innocence dekh kar comedy show lagta hai, par genuine banda ho yaar.",
+    "tum overthink itna kam karte ho ke calculator bhi jealous ho, par peace of mind level top hai.",
+    "tumhari simple soch se strategy games mein haar jao ge, par real life mein trustworthy ho.",
+    "log tumhe underestimate karte hain, par tumhari sadगi asal charm hai.",
+    "tumhari plain honesty kisi PhD thesis se zyada samajh aati hai, respect.",
+    "tum complicated nahi ho, isliye friends list mein sabse relaxing insaan ho.",
+    "tumhari simplicity itni pure hai ke villain bhi tumhe hurt karne se pehle sochega."
+  ] },
+  { key: "pagal", out: [
+    "tumhara dimaag itna unique wavelength pe chalta hai ke WiFi bhi confuse ho jaye, par genius level hai ye.",
+    "tumhari soch itni wild hai ke scientists bhi research karna chahenge, thoda crazy sahi lekin brilliant.",
+    "tum out of the box itna sochte ho ke box khud gum ho jata hai, par innovation yehi hoti hai.",
+    "tumhari energy dekh kar lagta hai caffeine tumse darta hai, par entertainment guaranteed hai tumse.",
+    "tum jo bhi karte ho unexpected hota hai, sabko heart attack aata hai par maza bhi aata hai.",
+    "tumhari madness mein itna method hai ke Sherlock bhi confuse ho jaye.",
+    "tum risk lene se nahi darte, isliye insurance company bhi tumse darti hogi, par bold move hai ye.",
+    "tumhari originality itni high hai ke Instagram filters bhi copy nahi kar sakte.",
+    "tum kisi bhi normal situation ko circus bana sakte ho, par bore kabhi nahi karte.",
+    "tumhari crazy energy dekh kar lagta hai battery kabhi khatam hi nahi hoti."
+  ] },
+  { key: "ganda", out: [
+    "tumhara style itna alag hai ke fashion police bhi confuse ho jayegi, par apna hi trend set karte ho.",
+    "tumhara look itna original hai ke koi copy karne ki himmat hi nahi karta.",
+    "tum apni khud ki category ho, comparison hi impossible hai — thoda messy sahi, unique zaroor.",
+    "tumhari messy energy mein bhi ek weird charm hai jo explain nahi ho sakta.",
+    "tum rules follow nahi karte appearance ke, isliye designers bhi tumse seekh sakte hain.",
+    "tumhara raw look itna real hai ke filters bhi haar maan lein.",
+    "tumhari authenticity kisi polish se zyada valuable hai, chahe thodi rough ho.",
+    "tum apne aap ko badalte nahi, confidence level max hai — thoda chaotic sahi.",
+    "tumhara style kisi trend ka mohtaj nahi, khud hi trend ho tum.",
+    "tumhara vibe itna different hai ke log dekh kar sochte hain 'ye kya hai', par yaad reh jaate ho."
+  ] },
+  { key: "bewakoof", out: [
+    "itni masoomiyat hai ke cartoons bhi tumse advice le sakte hain, thodi innocent sahi lekin pure ho.",
+    "tumhari innocence dekh kar sabka mood acha ho jata hai, chahe thoda naive ho.",
+    "tum bina drama ke reactions dete ho, ye rare quality hai — thoda simple sahi.",
+    "tumhari masoom baatein sabko has deti hain, unintentional comedy king/queen ho.",
+    "tum dil se bolte ho, dimaag se calculate nahi karte — filter kam hai par honesty zyada.",
+    "tumhari simplicity logon ka dil jeet leti hai, chahe thodi confuse karti ho.",
+    "tum kabhi pretend nahi karte, ye rare hai — thoda predictable sahi, genuine zaroor.",
+    "tumhari innocent baatein kabhi kabhi galat time pe aati hain, par dil sacha hota hai.",
+    "tum overthink nahi karte, isliye life easy lagti hai tumhe.",
+    "tumhari simplicity ek breath of fresh air hai, chahe thoda confusing bhi ho."
+  ] },
+  { key: "kamzor", out: [
+    "itne soft ho ke marshmallow bhi jealous ho, par emotional strength dil mein hoti hai.",
+    "tumhari gentleness hi tumhari real power hai, chahe log usse weakness samjhein.",
+    "tum emotionally strong ho, jo dikhta nahi wo hota hai — thoda fragile lagte ho, par nahi ho.",
+    "tumhari sensitivity tumhe insaan zyada banati hai, chahe drama zyada lagta ho.",
+    "tum dusron ka dard samajhte ho, ye badi taqat hai — chahe khud weak lagte ho.",
+    "tumhari softness tumhari weakness nahi, superpower hai — thoda hidden sahi.",
+    "tum breakdown ke baad bhi khada hona jaante ho, resilience underrated hai tumhari.",
+    "tumhari resilience quietly kaam karti hai, bina show off ke — thodi slow process hai.",
+    "tum feelings chupate nahi, ye emotional maturity hai — chahe overshare bhi karte ho.",
+    "tumhari kindness hi tumhari sabse badi strength hai, chahe log fayda uthaye kabhi kabhi."
+  ] },
+  { key: "lazy", out: [
+    "energy conserve karne ke itne expert ho ke solar panel bhi tumse seekh sakta hai.",
+    "itna relax rehte ho ke sloth bhi apni speed pe sharminda ho jaye, par stress-free life jeete ho.",
+    "tum apni energy sahi jagah use karte ho — sofa pe, par comfort level unmatched hai.",
+    "tumhari chill nature dusron ko bhi relax karati hai, chahe deadline miss ho jaye.",
+    "tum burnout se bachne ka tareeqa jaante ho — mostly kuch na karke, par healthy hai ye.",
+    "tumhari rest karne ki ability olympic level hai, gold medal deserve karte ho.",
+    "tum overwork nahi karte, ye healthy balance hai — thoda extreme sahi.",
+    "tumhari patience itni hai ke kaam khud hi wait karta reh jata hai.",
+    "tum apne pace pe chalte ho — jo mostly zero hota hai, par self-respect toh hai.",
+    "tumhari calmness kisi bhi deadline crisis mein bhi barqarar rehti hai, impressive dedication to chill."
+  ] },
+  { key: "bakwaas", out: [
+    "itni creativity hai baaton mein ke sach jhoot ka fark khud bhool jate ho, par kabhi boring nahi lagte.",
+    "tumhari baaton mein itna twist hota hai ke Netflix series bhi sharminda ho jaye.",
+    "tum kisi bhi topic ko interesting bana dete ho, chahe sach kam hi ho usme.",
+    "tumhari storytelling ka koi jawab nahi, fact-check zaroor karna padta hai though.",
+    "tum entertainment ka poora package ho, reliability thodi kam hai bas.",
+    "tumhari baaton mein hamesha kuch naya hota hai, sach ho ya na ho.",
+    "tum boring moment ko bhi maza dar bana dete ho, chahe believable na ho.",
+    "tumhari imagination kabhi khatam nahi hoti, screenwriter ban sakte ho.",
+    "tumhare pass hamesha ek naya (aur ajeeb) topic hota hai baat karne ko.",
+    "tumhari conversation skills kisi comedian se kam nahi, facts thodi flexible hain bas."
+  ] },
+  { key: "ugly", out: [
+    "apna alag hi look hai ke log dekh kar dobara zaroor dekhte hain, chahe wo confusion ho.",
+    "tumhara look itna original hai ke koi copy karne ki himmat nahi karta.",
+    "tumhari personality tumhari looks se zyada shine karti hai, thankfully.",
+    "tum apne andaaz mein hi perfect ho, chahe andaaz thoda weird ho.",
+    "tumhara confidence tumhe attractive banata hai, looks se zyada zaroori hai wo.",
+    "tum apne style ke khud trendsetter ho — dusre follow nahi karte, lekin unique to ho.",
+    "tumhari real beauty tumhari kindness mein hai, chehra thodi extra help maang raha hai.",
+    "tum jaisa koi doosra nahi, yehi tumhari khoobsurati hai — aur relief bhi sabke liye.",
+    "tumhari energy tumhare chehre se zyada bolti hai, achi baat hai ye.",
+    "tumhara natural look kisi filter se behtar hai, chahe filter zaroorat lage kabhi kabhi."
+  ] },
+  { key: "fail", out: [
+    "har try mein experience le rahe ho, itni baar try kiya ke expert ban gaye fail hone mein bhi.",
+    "tumhara har attempt ek naya lesson deta hai, tuition fee thodi zyada lagti hai though.",
+    "tum har baar seekh kar wapas aate ho, ye courage hai — chahe result wahi rehta ho.",
+    "tumhari consistency mein hi tumhari jeet chupi hai, chahe wins kam ho.",
+    "tum haar ke bhi try karna chorte nahi, stubborn ho ya brave, dono maan lete hain.",
+    "tumhari struggle hi tumhari success ki foundation hai, foundation thodi lambi ban rahi hai bas.",
+    "tum har mistake se strong hokar nikalte ho, mistakes ki list thodi lambi hai bas.",
+    "tumhara resilience level bohat high hai, kaam karne ka rate thoda kam hai.",
+    "tum give up nahi karte, ye sabse badi quality hai — result chahe jo ho.",
+    "tumhari journey tumhari sabse badi achievement hai, destination abhi door hai bas."
+  ] },
+  { key: "bura", out: [
+    "apni honesty bohat pasand aayi, sach bolte ho — chahe koi pucha na ho.",
+    "tum jo dil mein hota hai wahi bolte ho, ye brave quality hai — filter kabhi kabhi miss ho jata hai.",
+    "tumhari directness logon ko respect deti hai, ya darati hai, dono valid hain.",
+    "tum fake nahi hote, ye rare cheez hai — thoda brutal package mein aati hai though.",
+    "tumhari honesty kabhi kabhi harsh lagti hai lekin real hoti hai.",
+    "tum sach bolne se darte nahi, courage hai — diplomacy thodi missing hai bas.",
+    "tumhari transparency trust build karti hai, chahe thoda uncomfortable lage.",
+    "tum diplomatic nahi ho lekin genuine ho, dono qualities rare hain aajkal.",
+    "tumhari honest opinion hamesha valuable hoti hai, delivery thodi rough hoti hai bas.",
+    "tum jo sochte ho wahi bolte ho, integrity hai — surprise element thoda kam hota hai."
+  ] },
+  { key: "chup", out: [
+    "sunna aur observe karna ek bohat badi quality hai, chahe reply karne mein thoda time le lo.",
+    "tumhari khamoshi mein bhi ek confidence hai, mysterious vibe milti hai.",
+    "tum sochh samajh kar bolte ho, maturity hai — ya just kam interest, dono ho sakte hain.",
+    "tumhari observation power bohat sharp hai, expression thoda kam hai bas.",
+    "tum kam bolte ho lekin jab bolte ho impactful hota hai, worth the wait.",
+    "tumhari silence bhi kaafi kuch keh deti hai, decode karna thoda tough hai bas.",
+    "tum overthinking se bachte ho unnecessary baaton mein, ya bas thak gaye ho, dono theek hai.",
+    "tumhari calm nature sabko sukoon deti hai, chahe suspense bhi deti ho.",
+    "tum har baat pe react nahi karte, wisdom hai — ya poker face level pro ho.",
+    "tumhari khamoshi tumhari strength hai, translator kabhi kabhi zaroorat padti hai bas."
+  ] }
+];
+
+// Generic backhanded-compliment templates when no keyword matches
+const genericTemplates = [
+  (t) => `Waise "${t}" sunkar lagta hai tum ek hidden genius ho jo abhi discover nahi hua — ya bas confidence zyada hai.`,
+  (t) => `"${t}" - Masha Allah itni deep baat sirf ek legend hi bol sakta hai, ya koi bhi 3am mein.`,
+  (t) => `Arey wah, "${t}" — ye toh motivational speaker ki baat lag rahi hai, thodi free wali.`,
+  (t) => `"${t}" sunkar samajh aaya tum future ke Einstein ho, thoda time abhi bhi lagega.`,
+  (t) => `Itna confidence "${t}" bolne mein — CEO material ho, ya bas sharam nahi hai.`,
+  (t) => `"${t}" - yeh line kisi movie ka dialogue lagta hai, low budget wali sahi.`,
+  (t) => `Waah bhai, "${t}" bolke sabit kar diya tum unique ho — ya predictable, decide nahi kar pa raha.`,
+  (t) => `"${t}" sunkar lagta hai tumhare andar ek philosopher chupa hua hai, thoda confused wala.`,
+  (t) => `"${t}" - itni confidence se bola, coach bhi impressed ho jaye, ya chup ho jaye.`,
+  (t) => `Wah, "${t}" — ye inspirational quote se kam nahi, Instagram bio material hai.`
+];
+
+let currentResult = "";
+const usedPools = {}; // tracks which indices have been shown for each list, keyed by list id
+
+function pickWithoutRepeatUntilCycle(listId, list) {
+  if (!usedPools[listId] || usedPools[listId].length === 0) {
+    // Fresh pool: all indices available, shuffled
+    const indices = list.map((_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    usedPools[listId] = indices;
+  }
+  const nextIndex = usedPools[listId].pop();
+  return list[nextIndex];
+}
+
+function translateText() {
+  const input = document.getElementById('inputText').value.trim();
+  const resultBox = document.getElementById('result');
+
+  if (!input) {
+    resultBox.textContent = "Pehle kuch likho phir translate karo!";
+    return;
+  }
+
+  const lower = input.toLowerCase();
+  let matchedItem = null;
+
+  for (const item of insultToCompliment) {
+    if (lower.includes(item.key)) {
+      matchedItem = item;
+      break;
+    }
+  }
+
+  let output;
+  if (matchedItem) {
+    const variant = pickWithoutRepeatUntilCycle(matchedItem.key, matchedItem.out);
+    output = "😏 " + variant.charAt(0).toUpperCase() + variant.slice(1);
+  } else {
+    const variant = pickWithoutRepeatUntilCycle("__generic__", genericTemplates);
+    output = "😏 " + variant(input);
+  }
+
+  currentResult = output;
+  resultBox.classList.remove('pop');
+  void resultBox.offsetWidth;
+  resultBox.textContent = output;
+  resultBox.classList.add('pop');
+}
+
+function speakResult() {
+  if (!currentResult) return;
+  if ('speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance(currentResult.replace('😏', ''));
+    utter.rate = 0.95;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  } else {
+    alert("Is browser mein voice support nahi hai.");
+  }
+}
+
+function copyResult() {
+  if (!currentResult) return;
+  navigator.clipboard.writeText(currentResult).then(() => {
+    const resultBox = document.getElementById('result');
+    const original = resultBox.textContent;
+    resultBox.textContent = "✅ Copied!";
+    setTimeout(() => { resultBox.textContent = original; }, 800);
+  }).catch(() => {
+    alert("Copy nahi ho saka, manually copy kar lein.");
+  });
+}
+</script>
+
+</body>
+</html>

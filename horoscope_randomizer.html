@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horoscope Randomizer</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
+    color: #fff;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px 25px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  h1 { font-size: 24px; margin-bottom: 5px; }
+  p.subtitle { opacity: 0.8; margin-top: 0; margin-bottom: 20px; font-size: 14px; }
+  select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    margin-bottom: 18px;
+    background: #3a2a4d;
+    color: #fff;
+  }
+  button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(135deg, #f857a6, #ff5858);
+    color: white;
+    box-shadow: 0 4px 15px rgba(248,87,166,0.4);
+    transition: transform 0.15s ease;
+  }
+  button:active { transform: scale(0.96); }
+  .result {
+    margin-top: 22px;
+    min-height: 110px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 20px;
+    font-size: 17px;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lucky-row {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+    font-size: 13px;
+    opacity: 0.85;
+  }
+  .footer-btns { display: flex; gap: 10px; margin-top: 15px; }
+  .footer-btns button {
+    flex: 1;
+    font-size: 14px;
+    padding: 10px;
+    background: rgba(255,255,255,0.12);
+    box-shadow: none;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .pop { animation: pop 0.3s ease; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🔮 Horoscope Randomizer</h1>
+  <p class="subtitle">Apni rashi choose karo, bilkul random (aur bakwaas) prediction milega — 100% offline</p>
+
+  <select id="zodiac">
+    <option value="Aries">♈ Aries</option>
+    <option value="Taurus">♉ Taurus</option>
+    <option value="Gemini">♊ Gemini</option>
+    <option value="Cancer">♋ Cancer</option>
+    <option value="Leo">♌ Leo</option>
+    <option value="Virgo">♍ Virgo</option>
+    <option value="Libra">♎ Libra</option>
+    <option value="Scorpio">♏ Scorpio</option>
+    <option value="Sagittarius">♐ Sagittarius</option>
+    <option value="Capricorn">♑ Capricorn</option>
+    <option value="Aquarius">♒ Aquarius</option>
+    <option value="Pisces">♓ Pisces</option>
+  </select>
+
+  <button onclick="generateHoroscope()">Aaj Ka Haal Bataon</button>
+
+  <div class="result" id="result">Rashi choose karke button dabao 👆</div>
+
+  <div class="lucky-row" id="luckyRow" style="display:none;">
+    <div>🎨 Lucky Color: <b id="luckyColor"></b></div>
+    <div>🔢 Lucky Number: <b id="luckyNumber"></b></div>
+  </div>
+
+  <div class="footer-btns">
+    <button onclick="speakResult()">🔊 Speak It</button>
+    <button onclick="copyResult()">📋 Copy</button>
+  </div>
+</div>
+
+<script>
+const predictions = [
+  "Aaj tumhara phone tumse zyada busy rahega, lekin dil se koi acha message zaroor aayega.",
+  "Aaj kisi ke sath bahes na karo, kyunke aaj sitaray tumhare against hain — aur wo waise bhi jeet jayega.",
+  "Aaj chai thodi zyada meethi lagegi, ye ek sign hai ke din acha guzrega.",
+  "Aaj koi purana dost achanak yaad aayega — shayad usne udhar wapas maangne ka socha ho.",
+  "Aaj tumhari kismat itni acha hai ke red light bhi tumhe dekh kar green ho jaye.",
+  "Aaj thoda careful raho, kyunke tumhara WiFi bhi tumse naraz lag raha hai.",
+  "Aaj kisi bhi decision se pehle do baar sochna — pehli baar galat, doosri baar bhi galat hoga.",
+  "Aaj tumhare andar ek chhupa hua genius jaagega, bas coffee thodi zyada peeni paregi.",
+  "Aaj koi tumhe compliment dega jo asal mein sarcasm hoga — lekin tum khush ho jao ge.",
+  "Aaj paise ki baat mein savdhan raho, kisi ne udhaar maangne ka plan bana rakha hai.",
+  "Aaj tumhari energy itni high hogi ke log poochenge 'kya cheez khaayi hai'.",
+  "Aaj tumhara mood itna unpredictable hoga ke tum khud confuse ho jao ge.",
+  "Aaj koi purana message dekh kar has doge achanak se.",
+  "Aaj tumhari luck itni random hogi ke lottery bhi nahi, aur bill bhi nahi aayega.",
+  "Aaj thodi neend zyada aayegi, sitare kehte hain rest zaroori hai (ya bas laziness).",
+  "Aaj koi tumse sawal poochega jiska jawab tumhe khud nahi pata.",
+  "Aaj tumhara internet slow hoga, lekin tumhari patience test karne ke liye ye zaroori hai.",
+  "Aaj kisi cheez ko dhoondte dhoondte wo tumhare hath mein hi milegi.",
+  "Aaj tumhara sense of humor peak pe hoga, log has has kar pareshan ho jayenge.",
+  "Aaj koi tumhe follow back karega jo mahino se ignore kar raha tha."
+];
+
+const luckyColors = ["Red", "Blue", "Green", "Yellow", "Purple", "Black", "White", "Orange", "Pink", "Gold"];
+
+let lastPredictionIndex = -1;
+
+function generateHoroscope() {
+  const zodiac = document.getElementById('zodiac').value;
+
+  let index;
+  do {
+    index = Math.floor(Math.random() * predictions.length);
+  } while (index === lastPredictionIndex && predictions.length > 1);
+  lastPredictionIndex = index;
+
+  const prediction = predictions[index];
+  const color = luckyColors[Math.floor(Math.random() * luckyColors.length)];
+  const number = Math.floor(Math.random() * 99) + 1;
+
+  const resultBox = document.getElementById('result');
+  resultBox.classList.remove('pop');
+  void resultBox.offsetWidth;
+  resultBox.textContent = `${zodiac}: ${prediction}`;
+  resultBox.classList.add('pop');
+
+  document.getElementById('luckyColor').textContent = color;
+  document.getElementById('luckyNumber').textContent = number;
+  document.getElementById('luckyRow').style.display = 'flex';
+
+  window.currentResult = `${zodiac}: ${prediction} Lucky color: ${color}, lucky number: ${number}.`;
+}
+
+function speakResult() {
+  if (!window.currentResult) return;
+  if ('speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance(window.currentResult);
+    utter.rate = 0.95;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  } else {
+    alert("Is browser mein voice support nahi hai.");
+  }
+}
+
+function copyResult() {
+  if (!window.currentResult) return;
+  navigator.clipboard.writeText(window.currentResult).then(() => {
+    const resultBox = document.getElementById('result');
+    const original = resultBox.textContent;
+    resultBox.textContent = "✅ Copied!";
+    setTimeout(() => { resultBox.textContent = original; }, 800);
+  }).catch(() => {
+    alert("Copy nahi ho saka, manually copy kar lein.");
+  });
+}
+</script>
+
+</body>
+</html>

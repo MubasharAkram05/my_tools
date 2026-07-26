@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Pet</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #2b1055, #7597de);
+    color: #fff;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 22px;
+    padding: 26px 22px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .pet-name { font-size: 15px; opacity: 0.8; margin-bottom: 10px; }
+  .pet-stage {
+    background: rgba(0,0,0,0.2);
+    border-radius: 18px;
+    padding: 20px 10px;
+    margin: 15px 0;
+    position: relative;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .pet-emoji {
+    font-size: 90px;
+    transition: transform 0.3s ease;
+  }
+  .sleeping-badge {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 10px;
+  }
+  .age-badge {
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 10px;
+  }
+  .status-line {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-bottom: 15px;
+    min-height: 18px;
+  }
+  .stat-row {
+    text-align: left;
+    margin-bottom: 10px;
+  }
+  .stat-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 3px;
+    opacity: 0.9;
+  }
+  .stat-bar-bg {
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .stat-bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.4s ease;
+  }
+  .fill-hunger { background: linear-gradient(90deg, #ff9966, #ff5e62); }
+  .fill-happy { background: linear-gradient(90deg, #f6d365, #fda085); }
+  .fill-energy { background: linear-gradient(90deg, #43cea2, #185a9d); }
+  .fill-clean { background: linear-gradient(90deg, #56ccf2, #2f80ed); }
+
+  .btn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  button {
+    padding: 14px 8px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    transition: transform 0.15s ease;
+  }
+  button:active { transform: scale(0.95); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  #feedBtn { background: linear-gradient(135deg, #ff9966, #ff5e62); }
+  #playBtn { background: linear-gradient(135deg, #f6d365, #fda085); }
+  #sleepBtn { background: linear-gradient(135deg, #43cea2, #185a9d); }
+  #cleanBtn { background: linear-gradient(135deg, #56ccf2, #2f80ed); }
+  .reset-btn {
+    width: 100%;
+    margin-top: 12px;
+    background: rgba(255,255,255,0.12);
+    font-size: 12px;
+    padding: 10px;
+  }
+  .name-setup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .name-setup input {
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    background: #1e1b3a;
+    color: #fff;
+    text-align: center;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .bounce { animation: bounce 0.5s ease; }
+</style>
+</head>
+<body>
+
+<div class="card" id="setupCard" style="display:none;">
+  <h1>🐣 New Pet</h1>
+  <p class="pet-name">Apne pet ka naam do</p>
+  <div class="name-setup">
+    <input id="petNameInput" type="text" placeholder="Jaise Fluffy, Rocky, Milo..." maxlength="16">
+    <button style="background: linear-gradient(135deg, #43cea2, #185a9d);" onclick="createPet()">Pet Adopt Karo 🐾</button>
+  </div>
+</div>
+
+<div class="card" id="gameCard" style="display:none;">
+  <h1>Virtual Pet</h1>
+  <div class="pet-name" id="petNameLabel"></div>
+
+  <div class="pet-stage">
+    <span class="age-badge" id="ageBadge">Day 1</span>
+    <span class="sleeping-badge" id="sleepingBadge" style="display:none;">😴 Sleeping</span>
+    <div class="pet-emoji" id="petEmoji">🐱</div>
+  </div>
+
+  <div class="status-line" id="statusLine">Sab theek hai!</div>
+
+  <div class="stat-row">
+    <div class="stat-label"><span>🍖 Hunger</span><span id="hungerVal">100</span></div>
+    <div class="stat-bar-bg"><div class="stat-bar-fill fill-hunger" id="hungerBar" style="width:100%;"></div></div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-label"><span>😊 Happiness</span><span id="happyVal">100</span></div>
+    <div class="stat-bar-bg"><div class="stat-bar-fill fill-happy" id="happyBar" style="width:100%;"></div></div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-label"><span>⚡ Energy</span><span id="energyVal">100</span></div>
+    <div class="stat-bar-bg"><div class="stat-bar-fill fill-energy" id="energyBar" style="width:100%;"></div></div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-label"><span>🧼 Cleanliness</span><span id="cleanVal">100</span></div>
+    <div class="stat-bar-bg"><div class="stat-bar-fill fill-clean" id="cleanBar" style="width:100%;"></div></div>
+  </div>
+
+  <div class="btn-grid">
+    <button id="feedBtn" onclick="feedPet()">🍖 Feed</button>
+    <button id="playBtn" onclick="playPet()">🎾 Play</button>
+    <button id="sleepBtn" onclick="toggleSleep()">😴 Sleep</button>
+    <button id="cleanBtn" onclick="cleanPet()">🧼 Clean</button>
+  </div>
+
+  <button class="reset-btn" onclick="resetPet()">🔄 Reset / New Pet</button>
+</div>
+
+<script>
+const STORAGE_KEY = "virtualPetState";
+const DECAY_PER_HOUR = 4; // stat points lost per hour when awake
+const SLEEP_ENERGY_GAIN_PER_HOUR = 15;
+
+let pet = null;
+
+function loadPet() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    document.getElementById('setupCard').style.display = 'block';
+    return;
+  }
+  try {
+    pet = JSON.parse(raw);
+    applyTimeDecay();
+    document.getElementById('gameCard').style.display = 'block';
+    renderPet();
+  } catch (e) {
+    document.getElementById('setupCard').style.display = 'block';
+  }
+}
+
+function createPet() {
+  const nameInput = document.getElementById('petNameInput');
+  const name = nameInput.value.trim() || "Buddy";
+  pet = {
+    name: name,
+    hunger: 100,
+    happy: 100,
+    energy: 100,
+    clean: 100,
+    sleeping: false,
+    createdAt: Date.now(),
+    lastUpdate: Date.now()
+  };
+  savePet();
+  document.getElementById('setupCard').style.display = 'none';
+  document.getElementById('gameCard').style.display = 'block';
+  renderPet();
+}
+
+function savePet() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(pet));
+}
+
+function applyTimeDecay() {
+  const now = Date.now();
+  const hoursPassed = (now - pet.lastUpdate) / (1000 * 60 * 60);
+  if (hoursPassed <= 0) return;
+
+  if (pet.sleeping) {
+    pet.energy = Math.min(100, pet.energy + hoursPassed * SLEEP_ENERGY_GAIN_PER_HOUR);
+    pet.hunger = Math.max(0, pet.hunger - hoursPassed * (DECAY_PER_HOUR / 2));
+    pet.clean = Math.max(0, pet.clean - hoursPassed * (DECAY_PER_HOUR / 3));
+  } else {
+    pet.hunger = Math.max(0, pet.hunger - hoursPassed * DECAY_PER_HOUR);
+    pet.happy = Math.max(0, pet.happy - hoursPassed * DECAY_PER_HOUR);
+    pet.energy = Math.max(0, pet.energy - hoursPassed * (DECAY_PER_HOUR / 1.5));
+    pet.clean = Math.max(0, pet.clean - hoursPassed * (DECAY_PER_HOUR / 2));
+  }
+
+  pet.lastUpdate = now;
+  savePet();
+}
+
+function getMoodEmoji() {
+  const avg = (pet.hunger + pet.happy + pet.energy + pet.clean) / 4;
+  if (pet.sleeping) return "😴";
+  if (avg >= 75) return "😺";
+  if (avg >= 50) return "😐";
+  if (avg >= 25) return "😿";
+  return "🤢";
+}
+
+function getStatusMessage() {
+  if (pet.sleeping) return pet.name + " so raha hai... zzz";
+  if (pet.hunger < 20) return pet.name + " ko bhookh lagi hai! 🍖";
+  if (pet.energy < 20) return pet.name + " thak gaya hai, sula do.";
+  if (pet.clean < 20) return pet.name + " ganda ho gaya hai, saaf karo!";
+  if (pet.happy < 20) return pet.name + " bore ho raha hai, khelo usse.";
+  return pet.name + " khush hai! 🎉";
+}
+
+function getAgeDays() {
+  const days = Math.floor((Date.now() - pet.createdAt) / (1000 * 60 * 60 * 24));
+  return days + 1;
+}
+
+function renderPet() {
+  document.getElementById('petNameLabel').textContent = pet.name;
+  document.getElementById('ageBadge').textContent = "Day " + getAgeDays();
+  document.getElementById('sleepingBadge').style.display = pet.sleeping ? 'inline-block' : 'none';
+  document.getElementById('petEmoji').textContent = getMoodEmoji();
+  document.getElementById('statusLine').textContent = getStatusMessage();
+
+  document.getElementById('hungerVal').textContent = Math.round(pet.hunger);
+  document.getElementById('happyVal').textContent = Math.round(pet.happy);
+  document.getElementById('energyVal').textContent = Math.round(pet.energy);
+  document.getElementById('cleanVal').textContent = Math.round(pet.clean);
+
+  document.getElementById('hungerBar').style.width = pet.hunger + "%";
+  document.getElementById('happyBar').style.width = pet.happy + "%";
+  document.getElementById('energyBar').style.width = pet.energy + "%";
+  document.getElementById('cleanBar').style.width = pet.clean + "%";
+
+  document.getElementById('feedBtn').disabled = pet.sleeping;
+  document.getElementById('playBtn').disabled = pet.sleeping;
+  document.getElementById('cleanBtn').disabled = pet.sleeping;
+  document.getElementById('sleepBtn').textContent = pet.sleeping ? "☀️ Wake Up" : "😴 Sleep";
+}
+
+function bouncePet() {
+  const emoji = document.getElementById('petEmoji');
+  emoji.classList.remove('bounce');
+  void emoji.offsetWidth;
+  emoji.classList.add('bounce');
+}
+
+function feedPet() {
+  if (pet.sleeping) return;
+  pet.hunger = Math.min(100, pet.hunger + 25);
+  pet.happy = Math.min(100, pet.happy + 5);
+  pet.lastUpdate = Date.now();
+  savePet();
+  renderPet();
+  bouncePet();
+}
+
+function playPet() {
+  if (pet.sleeping) return;
+  pet.happy = Math.min(100, pet.happy + 25);
+  pet.energy = Math.max(0, pet.energy - 10);
+  pet.hunger = Math.max(0, pet.hunger - 5);
+  pet.lastUpdate = Date.now();
+  savePet();
+  renderPet();
+  bouncePet();
+}
+
+function cleanPet() {
+  if (pet.sleeping) return;
+  pet.clean = 100;
+  pet.happy = Math.min(100, pet.happy + 5);
+  pet.lastUpdate = Date.now();
+  savePet();
+  renderPet();
+  bouncePet();
+}
+
+function toggleSleep() {
+  pet.sleeping = !pet.sleeping;
+  pet.lastUpdate = Date.now();
+  savePet();
+  renderPet();
+  bouncePet();
+}
+
+function resetPet() {
+  if (confirm("Pakka new pet chahiye? Purana data delete ho jayega.")) {
+    localStorage.removeItem(STORAGE_KEY);
+    pet = null;
+    document.getElementById('gameCard').style.display = 'none';
+    document.getElementById('petNameInput').value = '';
+    document.getElementById('setupCard').style.display = 'block';
+  }
+}
+
+// Live tick every 5 seconds to reflect real-time decay while app is open
+setInterval(() => {
+  if (pet) {
+    applyTimeDecay();
+    renderPet();
+  }
+}, 5000);
+
+loadPet();
+</script>
+
+</body>
+</html>

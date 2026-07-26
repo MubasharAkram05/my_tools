@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compliment / Insult Battle Bot</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #360033, #0b8793);
+    color: #fff;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px 25px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  h1 { font-size: 24px; margin-bottom: 5px; }
+  p.subtitle { opacity: 0.75; margin-top: 0; margin-bottom: 20px; font-size: 14px; }
+  .btn-row { display: flex; gap: 12px; margin-bottom: 20px; }
+  .btn-row button {
+    flex: 1;
+    padding: 16px 10px;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    transition: transform 0.15s ease;
+  }
+  .btn-row button:active { transform: scale(0.95); }
+  #complimentBtn { background: linear-gradient(135deg, #56ab2f, #a8e063); box-shadow: 0 4px 15px rgba(86,171,47,0.4); }
+  #roastBtn { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 4px 15px rgba(255,65,108,0.4); }
+  .result {
+    margin-top: 5px;
+    min-height: 100px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 20px;
+    font-size: 18px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .score {
+    margin-top: 15px;
+    font-size: 13px;
+    opacity: 0.7;
+  }
+  .footer-btns { display: flex; gap: 10px; margin-top: 15px; }
+  .footer-btns button {
+    flex: 1;
+    font-size: 14px;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.12);
+    color: white;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.8) rotate(-2deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .pop { animation: pop 0.3s ease; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>⚔️ Battle Bot</h1>
+  <p class="subtitle">Compliment lo ya roast khao — 100% offline</p>
+
+  <div class="btn-row">
+    <button id="complimentBtn" onclick="fireCompliment()">😇 Compliment Me</button>
+    <button id="roastBtn" onclick="fireRoast()">🔥 Roast Me</button>
+  </div>
+
+  <div class="result" id="result">Kisi bhi button pe tap karo 👆</div>
+
+  <div class="score" id="score">Compliments: 0 &nbsp;|&nbsp; Roasts: 0</div>
+
+  <div class="footer-btns">
+    <button onclick="speakResult()">🔊 Speak It</button>
+    <button onclick="copyResult()">📋 Copy</button>
+  </div>
+</div>
+
+<script>
+const compliments = [
+  "Tum bohat smart ho, sabse alag soch rakhte ho.",
+  "Tumhari smile dekh kar din acha ho jata hai.",
+  "Tumhari mehnat aur consistency kamal ki hai.",
+  "Tum jese log rare hote hain, dil se genuine ho.",
+  "Tumhari confidence dekh kar motivation milti hai.",
+  "Tum bohat caring ho, log tumhe isi liye pasand karte hain.",
+  "Tumhari creativity kabhi kabhi shocking level ki hoti hai.",
+  "Tumhare andar leadership ki natural quality hai.",
+  "Tum jo bhi karte ho, poora dil laga kar karte ho.",
+  "Tumhari positivity aas paas ke logon ko bhi affect karti hai.",
+  "Tum bohat patient ho, ye rare skill hai aajkal.",
+  "Tumhara sense of humor kisi ka bhi din bana sakta hai.",
+  "Tum apne kaam mein bohat honest ho, ye badi baat hai.",
+  "Tumhari observation power bohat sharp hai.",
+  "Tum jese dost milna kismat ki baat hoti hai."
+];
+
+const roasts = [
+  "Tumhari wifi se zyada fast toh tumhari excuses hain.",
+  "Tumhari planning dekh kar lagta hai kal bhi aaj jaisa hi hoga.",
+  "Tum itna sochte ho ke decision Monday tak nahi ho pata.",
+  "Tumhari energy dekh kar lagta hai charger bhool aaye ho.",
+  "Tum late itni consistency se aate ho, ye bhi ek talent hai.",
+  "Tumhari to-do list itni lambi hai, doosri list mein khud ban jao.",
+  "Tum itna procrastinate karte ho, deadline bhi tumse dar jati hai.",
+  "Tumhari memory itni sharp hai ke kal ka plan bhi bhool jate ho.",
+  "Tum itna slow reply karte ho, pigeon post fast lagti hai.",
+  "Tumhari cooking itni unique hai ke naam nahi pata chalta dish ka.",
+  "Tum itna overthink karte ho ke simple cheez bhi mission ban jati hai.",
+  "Tumhari punctuality dekh kar clock bhi confuse ho jati hai.",
+  "Tum itni excuses banate ho, novel likh sakte ho ek din.",
+  "Tumhari handwriting dekh kar doctor bhi impressed ho jaye.",
+  "Tum itna multitask karte ho ke ek bhi kaam poora nahi hota."
+];
+
+let complimentCount = 0;
+let roastCount = 0;
+let currentResult = "";
+
+function showResult(text) {
+  currentResult = text;
+  const resultBox = document.getElementById('result');
+  resultBox.classList.remove('pop');
+  void resultBox.offsetWidth;
+  resultBox.textContent = text;
+  resultBox.classList.add('pop');
+  updateScore();
+  if (navigator.vibrate) {
+    navigator.vibrate(60);
+  }
+}
+
+function updateScore() {
+  document.getElementById('score').textContent =
+    `Compliments: ${complimentCount}  |  Roasts: ${roastCount}`;
+}
+
+function fireCompliment() {
+  const pick = compliments[Math.floor(Math.random() * compliments.length)];
+  complimentCount++;
+  showResult("😇 " + pick);
+}
+
+function fireRoast() {
+  const pick = roasts[Math.floor(Math.random() * roasts.length)];
+  roastCount++;
+  showResult("🔥 " + pick);
+}
+
+function speakResult() {
+  if (!currentResult) return;
+  if ('speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance(currentResult.replace(/[😇🔥]/g, ''));
+    utter.rate = 0.95;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  } else {
+    alert("Is browser mein voice support nahi hai.");
+  }
+}
+
+function copyResult() {
+  if (!currentResult) return;
+  navigator.clipboard.writeText(currentResult).then(() => {
+    const resultBox = document.getElementById('result');
+    const original = resultBox.textContent;
+    resultBox.textContent = "✅ Copied!";
+    setTimeout(() => { resultBox.textContent = original; }, 800);
+  }).catch(() => {
+    alert("Copy nahi ho saka, manually copy kar lein.");
+  });
+}
+</script>
+
+</body>
+</html>

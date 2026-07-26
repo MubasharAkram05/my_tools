@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excuse Generator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #1f1c2c, #928dab);
+    color: #fff;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px 25px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  h1 {
+    font-size: 26px;
+    margin-bottom: 5px;
+  }
+  p.subtitle {
+    opacity: 0.75;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    margin-bottom: 18px;
+    background: #2b2740;
+    color: #fff;
+  }
+  button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff6a88, #ff9a44);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255,106,136,0.4);
+    transition: transform 0.15s ease;
+  }
+  button:active {
+    transform: scale(0.96);
+  }
+  .result {
+    margin-top: 25px;
+    min-height: 90px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 18px;
+    font-size: 17px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .footer-btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  .footer-btns button {
+    flex: 1;
+    font-size: 14px;
+    padding: 10px;
+    background: rgba(255,255,255,0.12);
+    box-shadow: none;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .pop { animation: pop 0.25s ease; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🎭 Excuse Generator</h1>
+  <p class="subtitle">100% offline • tap and get instantly roasted with an excuse</p>
+
+  <select id="category">
+    <option value="office">Office / Late</option>
+    <option value="homework">Homework / Assignment</option>
+    <option value="class">Class Bunk</option>
+    <option value="reply">Not Replying to Messages</option>
+    <option value="random">Totally Random</option>
+  </select>
+
+  <button onclick="generateExcuse()">Generate Excuse</button>
+
+  <div class="result" id="result">Tap the button to get your excuse 👆</div>
+
+  <div class="footer-btns">
+    <button onclick="speakExcuse()">🔊 Speak It</button>
+    <button onclick="copyExcuse()">📋 Copy</button>
+  </div>
+</div>
+
+<script>
+const excuses = {
+  office: [
+    "Sir, meri bike ka clutch wire tut gaya raste mein.",
+    "Ghar ka main gate lock ho gaya tha, chabi mil hi nahi rahi thi.",
+    "Sorry sir, meri neend ka alarm khud so gaya tha.",
+    "Rasty mein aik cat cross kar rahi thi, ruk gaya shagun ke liye.",
+    "Wifi router restart kar rha tha isliye late ho gaya.",
+    "Sir mera phone hi kal raat 'do not disturb' pe soya reh gaya.",
+    "Ammi ne kaha pehle nashta karo phir jana, unse bahes nahi kar sakta tha.",
+    "Rickshaw wala galat rasty pe le gaya, wapas anay mein time lag gaya.",
+    "Sir, meri shirt pe achanak chai gir gayi, change karni padi.",
+    "Elevator phans gaya tha building mein, 20 minute nikalne mein lagay.",
+    "Meri gaari ka tyre punchure ho gaya raste mein.",
+    "Sir, mujhe lagta tha aaj Sunday hai.",
+    "Neighbour ka bacha kho gaya tha, dhoondnay mein madad karni padi.",
+    "Mera ATM card fas gaya machine mein, bank jana pada.",
+    "Sir wo pichli gali mein jalsa tha, traffic hi nahi hil raha tha.",
+    "Meri bike ka petrol khatam ho gaya raste mein hi.",
+    "Sir, mausam itna kohar wala tha ke rasta hi nahi dikh raha tha.",
+    "Ghar ka geyser phat gaya tha, plumber ko bulana pada.",
+    "Sir, meri chabi hi ghar bhool aaya, wapas jana pada.",
+    "Bijli chali gayi thi is liye iron nahi kar payi shirt."
+  ],
+  homework: [
+    "Meri copy meri chotti behn ne drawing book bana di.",
+    "Laptop update hone laga aur 3 ghantay le gaya.",
+    "Internet chala gaya tha jab main save kar raha tha.",
+    "Meri pen ki syahi khatam ho gayi aur dukan band thi.",
+    "Bijli chali gayi thi poori raat, likh hi nahi saka.",
+    "File corrupt ho gayi, kasam se maine banaya tha.",
+    "Bhai ne meri copy homework wali kisi aur kaam mein use kar li.",
+    "Meri copy bag mein se kisi ne ulti rakh di, dhoond nahi payi.",
+    "Printer ki ink khatam ho gayi thi aakhri waqt pe.",
+    "Ammi ne meri copy safai karte waqt kahin rakh di, mili hi nahi.",
+    "Meri USB kho gayi jismein sara kaam tha.",
+    "Laptop ki screen achanak crack ho gayi, kaam save nahi hua.",
+    "Cousins aa gaye achanak, poora din unke sath guzar gaya.",
+    "Mera group project wala member offline reh gaya poori raat.",
+    "Meri copy pe chai gir gayi, sara likha kharab ho gaya.",
+    "Wifi password change ho gaya tha, sara din try karta raha.",
+    "Ammi ne room saaf kiya aur meri copy kahin gum ho gayi.",
+    "Chotta bhai ne meri copy pe rang phenk diya.",
+    "Homework wali app hi crash ho gayi submit karte waqt."
+  ],
+  class: [
+    "Pait mein dard tha, doctor jana zaroori tha.",
+    "Ghar par mehmaan aa gaye achanak se.",
+    "Bus miss ho gayi aur agli 2 ghante baad thi.",
+    "Mausam itna kharab tha ke nikalna mushkil tha.",
+    "Meri tabiyat thodi kharab thi, rest karna zaroori tha.",
+    "Ammi ko akele shopping jana tha, sath jana pada.",
+    "Ghar mein mehman ki wajah se subah der ho gayi.",
+    "Meri uniform dhobi ke pas reh gayi thi.",
+    "Chotta bhai bemar ho gaya, hospital lena pada.",
+    "Rickshaw wale ne aana cancel kar diya achanak.",
+    "Ghar ka pani ka motor kharab ho gaya, theek karwana pada.",
+    "Neend hi der se khuli, alarm sunayi hi nahi diya.",
+    "Sir dopatta/uniform dhona reh gaya tha raat ko.",
+    "Ghar mein achanak mehmani ka intezam karna pada.",
+    "Rasty mein jalsa tha, gaari bilkul nahi hil rahi thi.",
+    "Meri jooti hi tut gayi subah, doosri dhoondni padi."
+  ],
+  reply: [
+    "Phone silent pe tha aur mujhe pata hi nahi chala.",
+    "Battery 1% pe thi, phone off ho gaya turant.",
+    "Message dekha lekin phir bhool gaya, sorry yaar.",
+    "Data package khatam ho gaya tha, WiFi bhi nahi tha.",
+    "So gaya tha, uthte hi bhool gaya reply karna.",
+    "Phone kahin gum ho gaya tha ghar mein hi.",
+    "Notification hi nahi aayi, pata nahi kyun.",
+    "Phone charging pe laga kar bhool gaya, dusre kamre mein tha.",
+    "Itni messages thi ke ye scroll mein reh gaya.",
+    "Ammi ne phone le liya tha kaam ke liye.",
+    "Screen crack ho gayi thi, touch kaam nahi kar raha tha.",
+    "App hi crash ho raha tha baar baar.",
+    "Phone update ho raha tha poore din.",
+    "Meri storage full thi, message load hi nahi ho raha tha.",
+    "Ghar ka wifi off tha aur data bhi nahi tha."
+  ],
+  random: [
+    "Ek UFO ne rasta rok liya tha, kya karta.",
+    "Meri billi ne mera phone chura liya tha.",
+    "Time travel karte karte thoda late ho gaya.",
+    "Wifi ki wajah se meri destiny hi change ho gayi.",
+    "Ghar ka Wi-Fi router mujh se naraz tha isliye late reply.",
+    "Mera clone kisi aur kaam mein busy tha.",
+    "Parallel universe mein phans gaya tha thodi der.",
+    "Meri kismat aaj off mode mein thi.",
+    "Ek jinn ne mera kaam adhoora chor diya.",
+    "Mars pe signal weak tha isliye late reply.",
+    "Meri shadow mujh se pehle nikal gaya tha ghar se.",
+    "Ek dragon ne rasta block kar rakha tha.",
+    "Meri ghadi ulta chalne lagi thi achanak.",
+    "Matrix mein glitch aa gaya tha thodi der ke liye."
+  ]
+};
+
+let currentExcuse = "";
+let lastExcuse = "";
+let lastCategory = "";
+
+function generateExcuse() {
+  const category = document.getElementById('category').value;
+  const list = excuses[category];
+
+  let pick;
+  if (list.length === 1) {
+    pick = list[0];
+  } else {
+    do {
+      pick = list[Math.floor(Math.random() * list.length)];
+    } while (pick === lastExcuse && category === lastCategory);
+  }
+
+  currentExcuse = pick;
+  lastExcuse = pick;
+  lastCategory = category;
+
+  const resultBox = document.getElementById('result');
+  resultBox.classList.remove('pop');
+  void resultBox.offsetWidth; // restart animation
+  resultBox.textContent = currentExcuse;
+  resultBox.classList.add('pop');
+}
+
+function speakExcuse() {
+  if (!currentExcuse) {
+    generateExcuse();
+  }
+  if ('speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance(currentExcuse);
+    utter.rate = 0.95;
+    utter.pitch = 1;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  } else {
+    alert("Is browser mein voice support nahi hai.");
+  }
+}
+
+function copyExcuse() {
+  if (!currentExcuse) {
+    generateExcuse();
+  }
+  navigator.clipboard.writeText(currentExcuse).then(() => {
+    const resultBox = document.getElementById('result');
+    const original = resultBox.textContent;
+    resultBox.textContent = "✅ Copied!";
+    setTimeout(() => { resultBox.textContent = original; }, 800);
+  }).catch(() => {
+    alert("Copy nahi ho saka, manually copy kar lein.");
+  });
+}
+</script>
+
+</body>
+</html>

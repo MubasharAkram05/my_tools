@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fake Interview Simulator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #232526, #414345);
+    color: #fff;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 28px 24px;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  h1 { font-size: 22px; margin: 0 0 5px; text-align: center; }
+  p.subtitle { opacity: 0.75; margin-top: 0; margin-bottom: 20px; font-size: 13px; text-align: center; }
+
+  select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    margin-bottom: 15px;
+    background: #2b2b2b;
+    color: #fff;
+  }
+  button.primary {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    color: #063;
+    box-shadow: 0 4px 15px rgba(56,239,125,0.3);
+    transition: transform 0.15s ease;
+  }
+  button.primary:active { transform: scale(0.96); }
+  .secondary-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    margin-top: 10px;
+  }
+  .practice-item {
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .practice-q { font-weight: bold; margin-bottom: 6px; }
+  .practice-a { opacity: 0.85; line-height: 1.4; font-size: 13.5px; }
+  .option-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    opacity: 0.85;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .option-row input { width: 16px; height: 16px; }
+  .timer-wrap {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    height: 6px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .timer-bar {
+    height: 100%;
+    background: linear-gradient(135deg, #38ef7d, #ffb347, #ff416c);
+    width: 100%;
+    transition: width 1s linear;
+  }
+  .timer-text { font-size: 11px; opacity: 0.7; text-align: center; margin-bottom: 8px; }
+  .history-item {
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .history-empty { text-align: center; opacity: 0.6; font-size: 13px; padding: 20px 0; }
+  .export-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    margin-top: 10px;
+  }
+  .clear-history-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 12px;
+    cursor: pointer;
+    background: rgba(255,65,108,0.2);
+    color: #ff9a9a;
+    margin-top: 12px;
+  }
+
+  .progress-wrap {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    height: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .q-counter { font-size: 12px; opacity: 0.7; margin-bottom: 8px; text-align: center; }
+
+  .question-box {
+    background: rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 18px;
+    font-size: 16px;
+    line-height: 1.4;
+    margin-bottom: 14px;
+    min-height: 70px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    margin-bottom: 10px;
+    background: #1c1c1c;
+    color: #fff;
+    resize: vertical;
+    font-family: inherit;
+  }
+  .nav-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .nav-row button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+  }
+  .speak-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .mic-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    margin-bottom: 6px;
+    transition: background 0.2s ease;
+  }
+  .mic-btn.listening {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,65,108,0.5); }
+    70% { box-shadow: 0 0 0 10px rgba(255,65,108,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,65,108,0); }
+  }
+  .mic-status {
+    font-size: 12px;
+    opacity: 0.7;
+    text-align: center;
+    margin-bottom: 10px;
+    min-height: 16px;
+  }
+  .hidden { display: none; }
+  .screen-wrap { position: relative; }
+  .close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .close-btn:active { transform: scale(0.9); }
+  .feedback-box {
+    background: rgba(0,0,0,0.25);
+    border-radius: 14px;
+    padding: 18px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .feedback-box h3 { margin-top: 0; }
+  .score {
+    font-size: 26px;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+    color: #38ef7d;
+  }
+  .tips { font-size: 13px; opacity: 0.85; margin-top: 10px; }
+  .ai-box {
+    background: rgba(0,0,0,0.2);
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 14px;
+  }
+  .ai-label { font-weight: bold; font-size: 14px; margin-bottom: 6px; }
+  .ai-note { font-size: 11px; opacity: 0.65; margin-bottom: 10px; line-height: 1.4; }
+  #apiKeyInput {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    font-size: 13px;
+    margin-bottom: 10px;
+    background: #1c1c1c;
+    color: #fff;
+  }
+  .ai-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(135deg, #7f00ff, #e100ff);
+    color: #fff;
+  }
+  .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-result {
+    margin-top: 12px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .restart-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff6a88, #ff9a44);
+    color: white;
+    margin-top: 15px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <button class="close-btn hidden" id="headerCloseBtn" onclick="goHome()">✕</button>
+  <h1>🎤 Fake Interview Simulator</h1>
+  <p class="subtitle">Pick a category, do a mock interview, get feedback at the end — 100% offline</p>
+
+  <!-- SETUP SCREEN -->
+  <div id="setupScreen">
+    <select id="category">
+      <option value="software">Software Developer / IT</option>
+      <option value="marketing">Marketing / Sales</option>
+      <option value="customer">Customer Service</option>
+      <option value="teaching">Teaching</option>
+      <option value="fresh">Fresh Graduate / HR Round</option>
+    </select>
+
+    <label class="option-row">
+      <input type="checkbox" id="shuffleToggle"> Shuffle question order
+    </label>
+    <label class="option-row">
+      <input type="checkbox" id="timerToggle" checked> Enable 60s timer per question
+    </label>
+
+    <button class="primary" onclick="startInterview()">Start Interview</button>
+    <button class="secondary-btn" onclick="startPractice()">📖 Practice Mode (see all Q&A)</button>
+    <button class="secondary-btn" onclick="showHistory()">📊 History</button>
+  </div>
+
+  <!-- HISTORY SCREEN -->
+  <div id="historyScreen" class="hidden">
+    <div class="screen-wrap" id="historyList"></div>
+  </div>
+
+  <!-- PRACTICE SCREEN -->
+  <div id="practiceScreen" class="hidden">
+    <div class="screen-wrap" id="practiceList"></div>
+  </div>
+
+  <!-- INTERVIEW SCREEN -->
+  <div id="interviewScreen" class="hidden">
+    <div class="screen-wrap">
+      <div class="q-counter" id="qCounter">Question 1 of 10</div>
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="question-box" id="questionBox">Question here</div>
+      <div id="timerSection" class="hidden">
+        <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+        <div class="timer-text" id="timerText">60s left</div>
+      </div>
+      <button class="speak-btn" onclick="speakQuestion()">🔊 Read Question Aloud</button>
+      <textarea id="answerBox" placeholder="Type or speak your answer here..." spellcheck="true" lang="en"></textarea>
+      <div style="font-size:11px; opacity:0.6; margin-bottom:8px; text-align:center;">
+        Underlined word wrong? Long-press (mobile) or right-click (desktop) it for suggestions.
+      </div>
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤 Speak to Type</button>
+      <div class="mic-status" id="micStatus"></div>
+      <div class="nav-row">
+        <button onclick="prevQuestion()">⬅ Previous</button>
+        <button onclick="nextQuestion()" id="nextBtn">Next ➡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEEDBACK SCREEN -->
+  <div id="feedbackScreen" class="hidden">
+    <div class="screen-wrap">
+      <div class="feedback-box">
+        <h3>📋 Interview Feedback</h3>
+        <div class="score" id="scoreDisplay">7 / 10</div>
+        <p id="feedbackText"></p>
+        <div class="tips" id="tipsText"></div>
+      </div>
+
+      <div class="ai-box">
+        <div class="ai-label">🤖 Get real AI feedback (optional)</div>
+        <div class="ai-note">Requires your own Anthropic API key. The key is only kept in memory for this session — never saved or sent anywhere except directly to Anthropic's API. Don't use this on a device/browser you don't trust, and never publish a hosted copy of this file with a key baked in.</div>
+        <input type="password" id="apiKeyInput" placeholder="Paste your Anthropic API key here">
+        <button class="ai-btn" id="aiFeedbackBtn" onclick="getAIFeedback()">Get AI Feedback</button>
+        <div class="ai-result" id="aiResult"></div>
+        <button class="export-btn hidden" id="speakAiBtn" onclick="speakAIResult()">🔊 Listen to AI Feedback</button>
+      </div>
+
+      <button class="export-btn" onclick="exportTranscript()">⬇ Download Transcript (.txt)</button>
+      <button class="restart-btn" onclick="restartInterview()">🔁 Try Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const questionBanks = {
+  software: [
+    "Introduce yourself in 2 minutes.",
+    "Which programming language are you strongest in, and why?",
+    "Describe a difficult bug you fixed recently.",
+    "What do you know about Git and version control?",
+    "How do you handle disagreements within a team?",
+    "Describe your best project so far.",
+    "Explain a REST API in simple terms.",
+    "What do you do when you're at risk of missing a deadline?",
+    "Where do you see yourself in 5 years?",
+    "Why should we hire you for this company?"
+  ],
+  marketing: [
+    "Introduce yourself in 2 minutes.",
+    "Share an example of a successful marketing campaign you admire.",
+    "What's the difference between social media and traditional marketing?",
+    "How would you handle an unhappy client?",
+    "What's your biggest professional achievement so far?",
+    "How do you identify a target audience?",
+    "How would you run effective marketing with a low budget?",
+    "Describe a time you showed leadership in a team.",
+    "Where do you see yourself in 5 years?",
+    "Why should we hire you for this company?"
+  ],
+  customer: [
+    "Introduce yourself in 2 minutes.",
+    "How would you calm down an angry customer?",
+    "Describe your most difficult customer service situation.",
+    "How do you prioritize when multiple customers need help at once?",
+    "What do you do when company policy conflicts with a customer's request?",
+    "How do you stay patient in stressful situations?",
+    "What's the best feedback you've received from a customer?",
+    "Describe a mistake you made at work and how you handled it.",
+    "Where do you see yourself in 5 years?",
+    "Why should we hire you for this company?"
+  ],
+  teaching: [
+    "Introduce yourself in 2 minutes.",
+    "How would you describe your teaching style?",
+    "How do you handle a student who isn't interested in the class?",
+    "How do you maintain discipline in the classroom?",
+    "Share your most successful lesson plan.",
+    "How do you handle communication with parents?",
+    "How do you use technology in teaching?",
+    "How do you support weaker students?",
+    "Where do you see yourself in 5 years?",
+    "Why should we hire you for this school/institute?"
+  ],
+  fresh: [
+    "Introduce yourself in 2 minutes.",
+    "What are your strengths and weaknesses?",
+    "Why are you interested in this field/job?",
+    "What's the biggest lesson you learned during college?",
+    "Do you prefer teamwork or individual work, and why?",
+    "How do you handle stress or pressure?",
+    "What's your biggest achievement so far?",
+    "What are your salary expectations?",
+    "Where do you see yourself in 5 years?",
+    "Why should we hire you for this company?"
+  ]
+};
+
+const categoryNames = {
+  software: "Software Developer / IT",
+  marketing: "Marketing / Sales",
+  customer: "Customer Service",
+  teaching: "Teaching",
+  fresh: "Fresh Graduate / HR Round"
+};
+
+const modelAnswers = {
+  software: [
+    "My name is [Name], I have a background in [degree/field], and I've worked on projects using [key technologies]. I'm most interested in [specific area, e.g. backend development or cloud], and I'm looking for a role where I can grow those skills.",
+    "I'm strongest in [language], because I've used it on real projects like [example]. I like it because [reason — readability, ecosystem, performance, etc.].",
+    "In one project, I ran into a bug where [describe issue]. I debugged it by [method — logs, breakpoints, isolating the code], and found the root cause was [cause]. Fixing it taught me to [lesson learned].",
+    "Git lets multiple developers work on the same codebase without overwriting each other's work. I use branches for features, commit often with clear messages, and use pull requests for code review before merging.",
+    "I try to understand the other person's reasoning first, then explain mine with data or examples. If we still disagree, I suggest we get a third opinion or defer to whoever owns that part of the project.",
+    "My best project was [project name] — I built [what it does] using [tech stack]. The most challenging part was [challenge], and I'm proud of [specific result or outcome].",
+    "A REST API lets two systems talk over HTTP using standard methods like GET, POST, PUT, and DELETE. The client sends a request to an endpoint, and the server responds, usually with JSON data.",
+    "I flag the risk early instead of waiting until the last moment. I prioritize the most critical parts, ask for help or an extension if needed, and communicate clearly with my team or manager about the status.",
+    "In 5 years, I'd like to have grown into a more senior technical role, ideally specializing in [area, e.g. cloud security], while still writing code and mentoring newer developers.",
+    "I bring both technical skills and a genuine willingness to learn quickly. I'm reliable, I communicate clearly, and I care about writing code that's maintainable, not just code that works."
+  ],
+  marketing: [
+    "My name is [Name], I have experience in [marketing area — social media, content, paid ads], and I've worked on campaigns for [type of brand/product]. I enjoy the mix of creativity and data analysis in marketing.",
+    "I really admire [campaign name/brand]'s campaign because it combined strong storytelling with clear targeting — it didn't just get attention, it drove real measurable action from the audience.",
+    "Social media marketing is more interactive and real-time, letting you engage directly with your audience, while traditional marketing (TV, print) reaches a broader but less targeted audience with less immediate feedback.",
+    "I'd listen first to understand exactly what went wrong, apologize sincerely, and then offer a concrete solution or next step. Keeping the client informed throughout rebuilds trust faster than staying silent.",
+    "My biggest achievement was [example — e.g. growing a page's engagement by X%, launching a campaign that hit a sales target]. I'm proud of it because it showed the strategy actually worked, not just looked good on paper.",
+    "I look at demographics, interests, and behavior data from past campaigns or tools like Google Analytics and Meta Ads Manager to figure out who actually engages with and converts on our content.",
+    "I'd focus on the highest-impact, lowest-cost channels first — like organic social media and email marketing — and be very selective about which paid ads actually justify the spend.",
+    "In one project, I noticed a gap that no one on the team had addressed, so I proposed a plan, got buy-in from my manager, and coordinated the rest of the team to execute it.",
+    "In 5 years, I'd like to be leading a marketing team or specializing deeply in [area, e.g. performance marketing or brand strategy], with a track record of campaigns that clearly moved business metrics.",
+    "I bring a mix of creativity and analytical thinking — I don't just make things that look good, I care about whether they actually perform, and I keep learning from every campaign's results."
+  ],
+  customer: [
+    "My name is [Name], and I've worked in customer-facing roles for [X years/months], handling [type of support — calls, chat, in-person]. I enjoy helping people solve real problems and leaving them satisfied.",
+    "I stay calm, let them vent without interrupting, and acknowledge their frustration genuinely before offering a solution. Most people just want to feel heard before they're ready to listen to a fix.",
+    "One difficult situation was [describe briefly]. I stayed patient, escalated where needed, and followed up afterward to make sure the issue was actually resolved, not just closed.",
+    "I quickly assess urgency and impact — a system-down issue affecting many customers comes before a minor individual question — while making sure no one feels ignored in the process.",
+    "I explain the reasoning behind the policy honestly, and where there's flexibility, I look for a middle ground. If I truly can't help, I escalate to someone who can.",
+    "I remind myself the customer isn't upset with me personally — they're upset with a situation. Taking short breaks between difficult calls also helps me reset before the next one.",
+    "The best feedback I got was when a customer said I made a stressful problem feel manageable — it's usually the ones where I go a little beyond a scripted answer.",
+    "Once I gave a customer incorrect information by mistake. I called them back to correct it as soon as I realized, apologized, and made sure the correct outcome still happened.",
+    "In 5 years, I'd like to move into a team lead or training role in customer support, helping newer staff build the same patience and problem-solving approach.",
+    "I bring patience, clear communication, and genuine care about resolving issues — not just closing tickets quickly."
+  ],
+  teaching: [
+    "My name is [Name], I teach [subject/level], and my approach is to make lessons interactive rather than just lecture-based, so students actually engage instead of memorizing.",
+    "My teaching style is student-centered — I try to explain concepts through examples and real-life applications, then check understanding with questions rather than assuming everyone follows.",
+    "I try to find what actually interests that student and connect the material to it. Sometimes it's a one-on-one conversation to understand what's causing the disengagement in the first place.",
+    "I set clear expectations early, stay consistent with them, and address issues calmly and privately rather than publicly embarrassing a student.",
+    "My most successful lesson plan was on [topic] — I used [method, e.g. group activity or visual aids], and students retained the concept much better than with a standard lecture.",
+    "I keep parents updated proactively, not just when there's a problem, and I make sure to listen to their concerns about their child fully before responding.",
+    "I use tools like presentations, videos, and sometimes simple apps or quizzes to make lessons more engaging, especially for visual or interactive learners.",
+    "I give weaker students extra one-on-one time, break concepts into smaller steps, and celebrate small progress so they stay motivated instead of discouraged.",
+    "In 5 years, I'd like to have developed a reputation for genuinely engaging, effective teaching, and possibly taken on a curriculum development or mentoring role.",
+    "I bring patience, a genuine interest in each student's progress, and a teaching style that adapts to different learners rather than a one-size-fits-all approach."
+  ],
+  fresh: [
+    "My name is [Name], I recently completed my degree in [field], and during my studies I focused on [relevant coursework/projects]. I'm excited to start applying what I've learned in a real role.",
+    "My strengths are [1-2 real strengths, e.g. quick learner, good communicator]. A weakness I'm working on is [genuine weakness], and I've been improving it by [specific action].",
+    "I'm interested in this field because [genuine reason — a project that got you excited, a mentor's influence, a real interest in the work itself], and I want to build a long-term career in it.",
+    "The biggest lesson from college was learning how to manage my time across multiple deadlines and responsibilities, which taught me to prioritize and not procrastinate.",
+    "I enjoy teamwork because it brings different perspectives together, but I'm also comfortable working independently when a task needs focused, individual effort.",
+    "I try to break a stressful task into smaller steps and tackle them one at a time instead of getting overwhelmed by the whole thing. Taking short breaks also helps me stay clear-headed.",
+    "My biggest achievement so far is [example — a final year project, a competition, a certification]. I'm proud of it because it took real consistent effort over time.",
+    "I'm looking for a fair salary based on the market rate for this role and my experience level — I'm happy to discuss a specific number once I understand the full role and responsibilities.",
+    "In 5 years, I'd like to have grown into a more experienced, capable version of this role, ideally with some added responsibility or specialization.",
+    "I bring genuine enthusiasm to learn, a strong work ethic, and the kind of adaptability that comes from being new and eager to prove myself."
+  ]
+};
+
+let currentCategory = "";
+let currentQuestions = [];
+let currentIndex = 0;
+let answers = [];
+let timerEnabled = true;
+let timerInterval = null;
+let timeLeft = 60;
+const QUESTION_TIME = 60;
+
+function shuffleArray(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function startInterview() {
+  currentCategory = document.getElementById('category').value;
+  const shuffle = document.getElementById('shuffleToggle').checked;
+  timerEnabled = document.getElementById('timerToggle').checked;
+
+  currentQuestions = shuffle
+    ? shuffleArray(questionBanks[currentCategory])
+    : [...questionBanks[currentCategory]];
+
+  currentIndex = 0;
+  answers = new Array(currentQuestions.length).fill("");
+
+  document.getElementById('setupScreen').classList.add('hidden');
+  document.getElementById('feedbackScreen').classList.add('hidden');
+  document.getElementById('interviewScreen').classList.remove('hidden');
+  document.getElementById('headerCloseBtn').classList.remove('hidden');
+
+  showQuestion();
+}
+
+function startPractice() {
+  const category = document.getElementById('category').value;
+  const questions = questionBanks[category];
+  const answersModel = modelAnswers[category];
+
+  const listEl = document.getElementById('practiceList');
+  let html = `<h3 style="margin-top:0;">📖 ${categoryNames[category]} — Practice Q&A</h3>`;
+  questions.forEach((q, i) => {
+    html += `
+      <div class="practice-item">
+        <div class="practice-q">Q${i + 1}. ${q}</div>
+        <div class="practice-a">${answersModel[i]}</div>
+      </div>`;
+  });
+  listEl.innerHTML = html;
+
+  document.getElementById('setupScreen').classList.add('hidden');
+  document.getElementById('practiceScreen').classList.remove('hidden');
+  document.getElementById('headerCloseBtn').classList.remove('hidden');
+}
+
+function showQuestion() {
+  document.getElementById('qCounter').textContent =
+    `Question ${currentIndex + 1} of ${currentQuestions.length}`;
+  document.getElementById('questionBox').textContent = currentQuestions[currentIndex];
+  document.getElementById('answerBox').value = answers[currentIndex] || "";
+
+  const progress = ((currentIndex + 1) / currentQuestions.length) * 100;
+  document.getElementById('progressBar').style.width = progress + "%";
+
+  document.getElementById('nextBtn').textContent =
+    (currentIndex === currentQuestions.length - 1) ? "Finish Interview ✅" : "Next ➡";
+
+  startQuestionTimer();
+}
+
+function startQuestionTimer() {
+  clearInterval(timerInterval);
+  const timerSection = document.getElementById('timerSection');
+
+  if (!timerEnabled) {
+    timerSection.classList.add('hidden');
+    return;
+  }
+
+  timerSection.classList.remove('hidden');
+  timeLeft = QUESTION_TIME;
+  updateTimerDisplay();
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const pct = Math.max(0, (timeLeft / QUESTION_TIME) * 100);
+  document.getElementById('timerBar').style.width = pct + "%";
+  document.getElementById('timerText').textContent =
+    timeLeft > 0 ? `${timeLeft}s left` : "Time's up — finish when ready";
+}
+
+function saveCurrentAnswer() {
+  answers[currentIndex] = document.getElementById('answerBox').value.trim();
+}
+
+function nextQuestion() {
+  saveCurrentAnswer();
+  if (currentIndex === currentQuestions.length - 1) {
+    finishInterview();
+  } else {
+    currentIndex++;
+    showQuestion();
+  }
+}
+
+function prevQuestion() {
+  saveCurrentAnswer();
+  if (currentIndex > 0) {
+    currentIndex--;
+    showQuestion();
+  }
+}
+
+function speakQuestion() {
+  const text = currentQuestions[currentIndex];
+  if ('speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.95;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  } else {
+    alert("Voice is not supported in this browser.");
+  }
+}
+
+// ---- Voice-to-text (mic) with basic auto-correction for common misheard words ----
+let recognition = null;
+let isListening = false;
+let baseAnswerText = "";
+
+// Common words/phrases speech recognition tends to mishear, mapped to the correct version.
+// Matched as whole words/phrases, case-insensitive.
+const autoCorrectMap = {
+  "get hub": "GitHub",
+  "get lab": "GitLab",
+  "java script": "JavaScript",
+  "type script": "TypeScript",
+  "rest api": "REST API",
+  "an api": "an API",
+  "my sequel": "MySQL",
+  "sequel": "SQL",
+  "no sequel": "NoSQL",
+  "react js": "React.js",
+  "node js": "Node.js",
+  "dot net": ".NET",
+  "see plus plus": "C++",
+  "see sharp": "C#",
+  "python": "Python",
+  "java": "Java",
+  "cloud": "cloud",
+  "aws": "AWS",
+  "azure": "Azure",
+  "docker": "Docker",
+  "kubernetes": "Kubernetes",
+  "html": "HTML",
+  "css": "CSS",
+  "api": "API",
+  "ui": "UI",
+  "ux": "UX",
+  "seo": "SEO",
+  "kpi": "KPI",
+  "kpis": "KPIs",
+  "crm": "CRM",
+  "b2b": "B2B",
+  "b2c": "B2C",
+  "hr": "HR",
+  "ceo": "CEO",
+  "cto": "CTO",
+  "cfo": "CFO",
+  "roi": "ROI",
+  "ppc": "PPC",
+  "smm": "SMM",
+  "cv": "CV",
+  "linked in": "LinkedIn",
+  "instagram": "Instagram",
+  "facebook": "Facebook",
+  "google ads": "Google Ads",
+  "excel": "Excel",
+  "power point": "PowerPoint",
+  "power bi": "Power BI",
+  "curriculum": "curriculum",
+  "lesson plan": "lesson plan",
+  "class room": "classroom",
+  "class management": "class management"
+};
+
+function applyAutoCorrect(text) {
+  let corrected = text;
+  for (const wrong in autoCorrectMap) {
+    const correct = autoCorrectMap[wrong];
+    const pattern = new RegExp("\\b" + wrong.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "\\b", "gi");
+    corrected = corrected.replace(pattern, correct);
+  }
+  // Capitalize the first letter of each sentence
+  corrected = corrected.replace(/(^\s*\w|[.!?]\s*\w)/g, (c) => c.toUpperCase());
+  return corrected;
+}
+
+function toggleMic() {
+  const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = document.getElementById('micBtn');
+  const micStatus = document.getElementById('micStatus');
+
+  if (!SpeechRecognitionAPI) {
+    micStatus.textContent = "Mic is not supported here (needs HTTPS or localhost).";
+    return;
+  }
+
+  if (isListening) {
+    recognition.stop();
+    return;
+  }
+
+  recognition = new SpeechRecognitionAPI();
+  recognition.lang = "en-US";
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  baseAnswerText = document.getElementById('answerBox').value;
+  if (baseAnswerText && !baseAnswerText.endsWith(" ")) {
+    baseAnswerText += " ";
+  }
+
+  recognition.onstart = () => {
+    isListening = true;
+    micBtn.classList.add('listening');
+    micBtn.textContent = "⏹ Tap to Stop";
+    micStatus.textContent = "Listening... speak now";
+  };
+
+  recognition.onresult = (event) => {
+    let interimText = "";
+    let finalText = "";
+    for (let i = 0; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalText += event.results[i][0].transcript + " ";
+      } else {
+        interimText += event.results[i][0].transcript;
+      }
+    }
+    const combined = baseAnswerText + applyAutoCorrect(finalText) + interimText;
+    document.getElementById('answerBox').value = combined;
+  };
+
+  recognition.onerror = (event) => {
+    micStatus.textContent = "Mic error: " + event.error;
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    micBtn.classList.remove('listening');
+    micBtn.textContent = "🎤 Speak to Type";
+    micStatus.textContent = "";
+    baseAnswerText = document.getElementById('answerBox').value;
+  };
+
+  recognition.start();
+}
+
+const feedbackTemplates = [
+  "Overall a solid attempt — answer with a bit more confidence for an even stronger impression.",
+  "Your answers were detailed — keep using specific examples like this in a real interview too.",
+  "Some answers were short — try to explain a bit more, interviewers appreciate context.",
+  "You answered every question, and that consistency is a good sign — keep practicing.",
+  "Good confidence in your answers — just work on structuring them (start-middle-end)."
+];
+
+const tipsList = [
+  "Tip: Use the STAR method (Situation, Task, Action, Result) when answering.",
+  "Tip: For the 'weaknesses' question, always mention an improvement plan too.",
+  "Tip: Research the company a bit before the interview — it leaves a great impression.",
+  "Tip: Practice eye contact and a confident tone in front of a mirror.",
+  "Tip: Keep each answer to about 1-2 minutes, not too long."
+];
+
+function finishInterview() {
+  clearInterval(timerInterval);
+  document.getElementById('interviewScreen').classList.add('hidden');
+  document.getElementById('feedbackScreen').classList.remove('hidden');
+
+  const totalWords = answers.reduce((sum, a) => sum + (a ? a.split(/\s+/).filter(Boolean).length : 0), 0);
+  const answeredCount = answers.filter(a => a && a.length > 0).length;
+  const avgWords = answeredCount > 0 ? Math.round(totalWords / answeredCount) : 0;
+
+  let scoreNum;
+  if (answeredCount === 0) {
+    scoreNum = 0;
+  } else if (avgWords < 5) {
+    scoreNum = 4;
+  } else if (avgWords < 15) {
+    scoreNum = 6;
+  } else if (avgWords < 30) {
+    scoreNum = 8;
+  } else {
+    scoreNum = 9;
+  }
+  const score = `${scoreNum} / 10`;
+
+  document.getElementById('scoreDisplay').textContent = score;
+
+  const fb = feedbackTemplates[Math.floor(Math.random() * feedbackTemplates.length)];
+  document.getElementById('feedbackText').textContent =
+    `You answered ${answeredCount} / ${currentQuestions.length} questions. ${fb}`;
+
+  const tip1 = tipsList[Math.floor(Math.random() * tipsList.length)];
+  let tip2 = tipsList[Math.floor(Math.random() * tipsList.length)];
+  while (tip2 === tip1 && tipsList.length > 1) {
+    tip2 = tipsList[Math.floor(Math.random() * tipsList.length)];
+  }
+  document.getElementById('tipsText').innerHTML = tip1 + "<br>" + tip2;
+
+  // Reset AI feedback section for a new interview
+  document.getElementById('aiResult').textContent = "";
+  document.getElementById('speakAiBtn').classList.add('hidden');
+
+  saveToHistory(scoreNum, answeredCount);
+}
+
+// ---- History (localStorage) ----
+const HISTORY_KEY = "interviewSimHistory";
+
+function saveToHistory(scoreNum, answeredCount) {
+  const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  history.unshift({
+    category: categoryNames[currentCategory],
+    score: scoreNum,
+    answered: answeredCount,
+    total: currentQuestions.length,
+    date: new Date().toLocaleDateString()
+  });
+  // Keep only the most recent 20 attempts
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 20)));
+}
+
+function showHistory() {
+  const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  const listEl = document.getElementById('historyList');
+
+  let html = `<h3 style="margin-top:0;">📊 Practice History</h3>`;
+
+  if (history.length === 0) {
+    html += `<div class="history-empty">No attempts yet — complete an interview to see it here.</div>`;
+  } else {
+    history.forEach(h => {
+      html += `
+        <div class="history-item">
+          <span>${h.category} <br><small style="opacity:0.6;">${h.date} · ${h.answered}/${h.total} answered</small></span>
+          <strong>${h.score}/10</strong>
+        </div>`;
+    });
+    html += `<button class="clear-history-btn" onclick="clearHistory()">🗑 Clear History</button>`;
+  }
+
+  listEl.innerHTML = html;
+
+  document.getElementById('setupScreen').classList.add('hidden');
+  document.getElementById('historyScreen').classList.remove('hidden');
+  document.getElementById('headerCloseBtn').classList.remove('hidden');
+}
+
+function clearHistory() {
+  localStorage.removeItem(HISTORY_KEY);
+  showHistory();
+}
+
+// ---- Export transcript ----
+function exportTranscript() {
+  let text = `Fake Interview Simulator — Transcript\n`;
+  text += `Category: ${categoryNames[currentCategory]}\n`;
+  text += `Date: ${new Date().toLocaleString()}\n`;
+  text += `${"=".repeat(40)}\n\n`;
+
+  currentQuestions.forEach((q, i) => {
+    text += `Q${i + 1}: ${q}\n`;
+    text += `A: ${answers[i] || "(no answer given)"}\n\n`;
+  });
+
+  const aiResultText = document.getElementById('aiResult').textContent;
+  if (aiResultText) {
+    text += `${"=".repeat(40)}\nAI Feedback:\n${aiResultText}\n`;
+  }
+
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `interview_${currentCategory}_${Date.now()}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+async function getAIFeedback() {
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  const resultEl = document.getElementById('aiResult');
+  const btn = document.getElementById('aiFeedbackBtn');
+
+  if (!apiKey) {
+    resultEl.textContent = "Please paste your Anthropic API key first.";
+    return;
+  }
+
+  const qaText = currentQuestions.map((q, i) =>
+    `Q${i + 1}: ${q}\nAnswer: ${answers[i] || "(no answer given)"}`
+  ).join("\n\n");
+
+  const prompt = `You are an interview coach. Here is a mock interview for a ${categoryNames[currentCategory]} role.\n\n${qaText}\n\nGive concise, constructive feedback (under 200 words): what was good, what to improve, and 2-3 specific tips for this candidate.`;
+
+  btn.disabled = true;
+  btn.textContent = "Thinking...";
+  resultEl.textContent = "";
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 500,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData?.error?.message || `Request failed (${response.status})`);
+    }
+
+    const data = await response.json();
+    const textBlock = data.content.find(block => block.type === "text");
+    resultEl.textContent = textBlock ? textBlock.text : "No feedback returned.";
+    if (textBlock) {
+      document.getElementById('speakAiBtn').classList.remove('hidden');
+    }
+  } catch (err) {
+    resultEl.textContent = "Error: " + err.message + " (check your API key and internet connection)";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Get AI Feedback";
+  }
+}
+
+function speakAIResult() {
+  const text = document.getElementById('aiResult').textContent;
+  if (!text) return;
+  if ('speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.95;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  } else {
+    alert("Voice is not supported in this browser.");
+  }
+}
+
+function restartInterview() {
+  document.getElementById('feedbackScreen').classList.add('hidden');
+  document.getElementById('setupScreen').classList.remove('hidden');
+  document.getElementById('headerCloseBtn').classList.add('hidden');
+}
+
+function goHome() {
+  clearInterval(timerInterval);
+  document.getElementById('interviewScreen').classList.add('hidden');
+  document.getElementById('feedbackScreen').classList.add('hidden');
+  document.getElementById('practiceScreen').classList.add('hidden');
+  document.getElementById('historyScreen').classList.add('hidden');
+  document.getElementById('setupScreen').classList.remove('hidden');
+  document.getElementById('headerCloseBtn').classList.add('hidden');
+}
+</script>
+
+</body>
+</html>
