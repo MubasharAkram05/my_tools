@@ -1,1 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Age Calculator Pro - Precision Time Analytics</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f3ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              400: '#818cf8',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'shake': 'shake 0.4s ease-in-out',
+          },
+          keyframes: {
+            'shake': {
+              '0%, 100%': { transform: 'translateX(0)' },
+              '20%, 60%': { transform: 'translateX(-5px)' },
+              '40%, 80%': { transform: 'translateX(5px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    .dark .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card-subtle {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass-card-subtle {
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .glow-purple {
+      box-shadow: 0 0 35px -5px rgba(99, 102, 241, 0.25);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.4);
+      border-radius: 9999px;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.2rem center;
+      background-repeat: no-repeat;
+      background-size: 0.9em 0.9em;
+      padding-right: 1.1rem;
+    }
+
+    /* Custom dropdown (limits list height, never full screen) */
+    .cdd-native {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px;
+      height: 1px;
+    }
+    .cdd-panel {
+      position: fixed;
+      z-index: 9999;
+      overflow-y: auto;
+      max-height: 200px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen font-sans transition-colors duration-300 relative overflow-x-hidden selection:bg-brand-500 selection:text-white">
+
+  <!-- Background Animated Glow Orbs -->
+  <div class="fixed top-[-10%] left-[-10%] w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] rounded-full bg-gradient-to-tr from-indigo-500/20 to-purple-500/30 blur-[100px] sm:blur-[120px] pointer-events-none animate-pulse-slow"></div>
+  <div class="fixed bottom-[-10%] right-[-10%] w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-600/20 blur-[100px] sm:blur-[120px] pointer-events-none animate-pulse-slow" style="animation-delay: 2s;"></div>
+
+  <div class="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-5xl min-h-screen flex flex-col justify-between relative z-10">
+
+    <!-- HEADER -->
+    <header class="relative flex items-center justify-between mb-6 pb-3 border-b border-slate-200/50 dark:border-slate-800/50 gap-2">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/30 transform hover:rotate-6 transition-transform shrink-0">
+          <i class="fa-solid fa-hourglass-half text-base sm:text-lg"></i>
+        </div>
+        <div class="hidden sm:block">
+          <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Analytics Suite</span>
+        </div>
+      </div>
+
+      <!-- Center Title + Live Time Directly Below -->
+      <div class="text-center flex-1 flex flex-col items-center justify-center">
+        <h1 class="font-display font-black text-xl sm:text-3xl md:text-4xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-brand-600 via-purple-600 to-pink-500 dark:from-brand-400 dark:via-purple-400 dark:to-pink-400">
+          Age Calculator Pro
+        </h1>
+
+        <!-- Live Clock Placed Directly Under Title -->
+        <div class="mt-1 flex items-center gap-1.5 px-3 py-1 rounded-full glass-card-subtle text-[11px] sm:text-xs font-mono text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-800/60 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0"></span>
+          <span id="liveTime">00:00:00</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button id="themeToggleBtn" title="Toggle Theme" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl glass-card flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-200 active:scale-95 shrink-0">
+          <i id="themeIcon" class="fa-solid fa-moon text-base sm:text-lg"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-5 my-auto">
+
+      <section class="lg:col-span-5 flex flex-col gap-5">
+        
+        <div class="glass-card rounded-3xl p-4 sm:p-6 shadow-xl glow-purple relative overflow-hidden transition-all duration-300 border border-slate-200/60 dark:border-slate-800/60">
+          
+          <form id="ageForm" class="space-y-5" onsubmit="return false;">
+            
+            <!-- PART 1: DATE OF BIRTH -->
+            <div>
+              <div class="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800/60 mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-xs">
+                    1
+                  </div>
+                  <h2 class="font-display text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-baby text-brand-500"></i> Date of Birth (DOB)
+                  </h2>
+                </div>
+              </div>
+
+              <!-- DOB Boxes -->
+              <div class="flex justify-center gap-2 sm:gap-3 max-w-xs mx-auto">
+                <div class="w-16 sm:w-20">
+                  <label for="dobDay" class="block text-[10px] sm:text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center mb-1">
+                    Day
+                  </label>
+                  <select id="dobDay" required class="w-full h-12 sm:h-14 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-0.5 py-3 text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all dark:text-white shadow-inner cursor-pointer appearance-none">
+                    <option value="" disabled selected>DD</option>
+                  </select>
+                </div>
+
+                <div class="w-20 sm:w-24">
+                  <label for="dobMonth" class="block text-[10px] sm:text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center mb-1">
+                    Month
+                  </label>
+                  <select id="dobMonth" required class="w-full h-12 sm:h-14 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-0.5 py-3 text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all dark:text-white shadow-inner cursor-pointer appearance-none">
+                    <option value="" disabled selected>MM</option>
+                  </select>
+                </div>
+
+                <div class="w-20 sm:w-24">
+                  <label for="dobYear" class="block text-[10px] sm:text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center mb-1">
+                    Year
+                  </label>
+                  <select id="dobYear" required class="w-full h-12 sm:h-14 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-0.5 py-3 text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all dark:text-white shadow-inner cursor-pointer appearance-none">
+                    <option value="" disabled selected>YYYY</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- DIVIDER LINE -->
+            <div class="relative flex items-center justify-center my-1">
+              <div class="w-full border-t border-slate-200/60 dark:border-slate-800/60"></div>
+              <span class="absolute bg-white dark:bg-slate-900 px-3 text-[9px] sm:text-[10px] font-bold text-slate-400 tracking-widest uppercase rounded-full border border-slate-200 dark:border-slate-800">
+                Calculated At
+              </span>
+            </div>
+
+            <!-- PART 2: TARGET DATE -->
+            <div>
+              <div class="flex items-center justify-between pb-1.5 border-b border-slate-200/60 dark:border-slate-800/60 mb-2">
+                <div class="flex items-center gap-1.5">
+                  <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-[10px] sm:text-[11px]">
+                    2
+                  </div>
+                  <h2 class="font-display text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                    <i class="fa-solid fa-flag-checkered text-emerald-500 text-xs"></i> Target Date
+                    <span id="targetTodayBadge" class="text-emerald-600 dark:text-emerald-400 font-extrabold text-xs ml-1">
+                      (Today)
+                    </span>
+                  </h2>
+                </div>
+
+                <button type="button" id="toggleCustomTargetBtn" class="text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center gap-1">
+                  <span>Custom</span>
+                  <i id="customBtnIcon" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
+                </button>
+              </div>
+
+              <!-- Target Date Dropdowns -->
+              <div id="targetDateBoxes" class="hidden flex justify-center gap-2 mt-2 transition-all max-w-xs mx-auto">
+                <div class="w-16 sm:w-20">
+                  <label for="targetDay" class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center mb-0.5">
+                    Day
+                  </label>
+                  <select id="targetDay" required class="w-full h-10 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-0.5 py-1.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all dark:text-white shadow-inner cursor-pointer appearance-none">
+                    <option value="" disabled selected>DD</option>
+                  </select>
+                </div>
+
+                <div class="w-20 sm:w-24">
+                  <label for="targetMonth" class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center mb-0.5">
+                    Month
+                  </label>
+                  <select id="targetMonth" required class="w-full h-10 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-0.5 py-1.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all dark:text-white shadow-inner cursor-pointer appearance-none">
+                    <option value="" disabled selected>MM</option>
+                  </select>
+                </div>
+
+                <div class="w-20 sm:w-24">
+                  <label for="targetYear" class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center mb-0.5">
+                    Year
+                  </label>
+                  <select id="targetYear" required class="w-full h-10 text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-0.5 py-1.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all dark:text-white shadow-inner cursor-pointer appearance-none">
+                    <option value="" disabled selected>YYYY</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="errorMessage" class="hidden p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2 animate-shake">
+              <i class="fa-solid fa-circle-exclamation text-sm shrink-0"></i>
+              <span id="errorText">Please select a valid date!</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2.5 pt-1">
+              <button type="submit" id="calculateBtn" class="flex-1 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold py-3 px-4 rounded-2xl shadow-lg shadow-brand-500/25 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base">
+                <i class="fa-solid fa-wand-magic-sparkles text-sm"></i> Calculate Age
+              </button>
+              <button type="button" id="clearBtn" title="Clear Inputs" class="px-3.5 py-3 rounded-2xl bg-slate-200/60 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 active:scale-95 transition-all duration-200 shrink-0">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <div id="zodiacCard" class="glass-card rounded-3xl p-4 sm:p-5 shadow-lg flex items-center gap-3.5 border border-slate-200/50 dark:border-slate-800/50 transition-all duration-300">
+          <div id="zodiacIcon" class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-orange-500/20 text-amber-500 dark:text-amber-400 flex items-center justify-center text-xl sm:text-2xl shrink-0">
+            ✨
+          </div>
+          <div class="overflow-hidden flex-1">
+            <div class="flex justify-between items-center">
+              <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Zodiac Sign</span>
+              <span id="zodiacName" class="text-xs font-bold text-brand-600 dark:text-brand-400">---</span>
+            </div>
+            <h3 id="zodiacDateRange" class="font-display font-semibold text-xs sm:text-sm text-slate-800 dark:text-white mt-0.5 truncate">Select Date of Birth</h3>
+            <p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">Calculated automatically</p>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="lg:col-span-7 flex flex-col gap-5">
+        
+        <div class="glass-card rounded-3xl p-5 sm:p-6 md:p-8 shadow-xl relative overflow-hidden">
+          
+          <div class="flex justify-between items-center mb-4 sm:mb-5">
+            <h2 class="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <i class="fa-solid fa-cake-candles text-pink-500"></i> Age Breakdown
+            </h2>
+            <span id="summaryBadge" class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20 hidden">
+              Calculated
+            </span>
+          </div>
+
+          <!-- Day Born On Only (Birth Month Box Removed) -->
+          <div class="mb-4 sm:mb-5">
+            <div class="p-3 sm:p-3.5 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20 flex items-center gap-3 w-full">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-base sm:text-lg shrink-0">
+                <i class="fa-solid fa-calendar-day"></i>
+              </div>
+              <div class="overflow-hidden flex-1">
+                <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block truncate">Day Born On</span>
+                <span id="dayNameDisplay" class="font-display font-extrabold text-sm sm:text-lg text-indigo-600 dark:text-indigo-400 truncate block">--</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+            
+            <div class="glass-card-subtle p-3 sm:p-5 rounded-2xl flex flex-col justify-center items-center transform transition-transform hover:-translate-y-1">
+              <span id="yearsVal" class="font-display text-2xl sm:text-4xl md:text-5xl font-extrabold text-brand-600 dark:text-brand-400 tracking-tight">--</span>
+              <span class="text-[10px] sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Years</span>
+            </div>
+
+            <div class="glass-card-subtle p-3 sm:p-5 rounded-2xl flex flex-col justify-center items-center transform transition-transform hover:-translate-y-1">
+              <span id="monthsVal" class="font-display text-2xl sm:text-4xl md:text-5xl font-extrabold text-purple-600 dark:text-purple-400 tracking-tight">--</span>
+              <span class="text-[10px] sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Months</span>
+            </div>
+
+            <div class="glass-card-subtle p-3 sm:p-5 rounded-2xl flex flex-col justify-center items-center transform transition-transform hover:-translate-y-1">
+              <span id="daysVal" class="font-display text-2xl sm:text-4xl md:text-5xl font-extrabold text-pink-600 dark:text-pink-400 tracking-tight">--</span>
+              <span class="text-[10px] sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Days</span>
+            </div>
+
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-slate-200/50 dark:border-slate-800/50">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-gift text-amber-500"></i> Next Birthday
+              </span>
+              <span id="nextBdayDayOfWeek" class="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">---</span>
+            </div>
+            
+            <div class="flex items-center justify-between bg-slate-100/60 dark:bg-slate-900/60 p-3 rounded-2xl border border-slate-200/40 dark:border-slate-800/40 mb-3 text-xs sm:text-sm">
+              <div class="font-medium text-slate-700 dark:text-slate-200 truncate" id="nextBdayText">
+                Calculated on date selection
+              </div>
+              <div class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 shrink-0 ml-2" id="nextBdayCount">
+                -- Mo -- Days
+              </div>
+            </div>
+
+            <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div id="nextBdayProgress" class="bg-gradient-to-r from-brand-500 to-pink-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="glass-card rounded-3xl p-5 sm:p-6 shadow-xl">
+          <h3 class="font-display text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200 mb-3 sm:mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-indigo-500"></i> Lifetime Stats
+          </h3>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+            
+            <div class="p-3 rounded-2xl bg-slate-100/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+              <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Total Months</span>
+              <span id="totalMonths" class="font-display text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">--</span>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-100/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+              <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Total Weeks</span>
+              <span id="totalWeeks" class="font-display text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">--</span>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-100/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+              <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Total Days</span>
+              <span id="totalDays" class="font-display text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">--</span>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-100/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+              <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Total Hours</span>
+              <span id="totalHours" class="font-display text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">--</span>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-100/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+              <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Total Minutes</span>
+              <span id="totalMinutes" class="font-display text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">--</span>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-100/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 col-span-2 sm:col-span-1">
+              <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Total Seconds</span>
+              <span id="totalSeconds" class="font-display text-base sm:text-lg font-bold text-brand-600 dark:text-brand-400 font-mono">--</span>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <footer class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-slate-200/40 dark:border-slate-800/40 pt-3">
+      <div class="flex items-center gap-2 text-[10px] sm:text-[11px]">
+        <span class="hover:text-brand-500 transition-colors cursor-pointer" onclick="setSampleDOB(14, 8, 1947)">Sample: 14/08/1947</span>
+        <span>•</span>
+        <span class="hover:text-brand-500 transition-colors cursor-pointer" onclick="setSampleDOB(1, 1, 2000)">Sample: 01/01/2000</span>
+      </div>
+
+      <div class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 bg-slate-200/50 dark:bg-slate-800/50 px-3 py-1 rounded-full border border-slate-300/40 dark:border-slate-700/40 text-[11px] sm:text-xs">
+        <span>Made by</span>
+        <span class="text-brand-600 dark:text-brand-400 font-bold">Mubashar Akram</span>
+        <i class="fa-solid fa-heart text-rose-500 text-xs"></i>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    const dobDayInput = document.getElementById('dobDay');
+    const dobMonthInput = document.getElementById('dobMonth');
+    const dobYearInput = document.getElementById('dobYear');
+
+    const targetDayInput = document.getElementById('targetDay');
+    const targetMonthInput = document.getElementById('targetMonth');
+    const targetYearInput = document.getElementById('targetYear');
+    const targetTodayBadge = document.getElementById('targetTodayBadge');
+    const targetDateBoxes = document.getElementById('targetDateBoxes');
+    const toggleCustomTargetBtn = document.getElementById('toggleCustomTargetBtn');
+    const customBtnIcon = document.getElementById('customBtnIcon');
+
+    const ageForm = document.getElementById('ageForm');
+    const clearBtn = document.getElementById('clearBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const liveTimeEl = document.getElementById('liveTime');
+
+    const dayNameDisplay = document.getElementById('dayNameDisplay');
+    const yearsVal = document.getElementById('yearsVal');
+    const monthsVal = document.getElementById('monthsVal');
+    const daysVal = document.getElementById('daysVal');
+    const summaryBadge = document.getElementById('summaryBadge');
+
+    const totalMonthsEl = document.getElementById('totalMonths');
+    const totalWeeksEl = document.getElementById('totalWeeks');
+    const totalDaysEl = document.getElementById('totalDays');
+    const totalHoursEl = document.getElementById('totalHours');
+    const totalMinutesEl = document.getElementById('totalMinutes');
+    const totalSecondsEl = document.getElementById('totalSeconds');
+
+    const nextBdayText = document.getElementById('nextBdayText');
+    const nextBdayCount = document.getElementById('nextBdayCount');
+    const nextBdayDayOfWeek = document.getElementById('nextBdayDayOfWeek');
+    const nextBdayProgress = document.getElementById('nextBdayProgress');
+
+    const zodiacName = document.getElementById('zodiacName');
+    const zodiacIcon = document.getElementById('zodiacIcon');
+    const zodiacDateRange = document.getElementById('zodiacDateRange');
+
+    let secondsTimer = null;
+    let liveSecondsCount = 0;
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June", 
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    const weekDays = [
+      "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+    ];
+
+    function populateDropdowns() {
+      updateDobYearOptions();
+      updateDobMonthOptions();
+      updateDobDayOptions();
+      updateTargetOptions();
+    }
+
+    function updateDobYearOptions() {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const selectedYear = parseInt(dobYearInput.value, 10);
+
+      dobYearInput.innerHTML = '<option value="" disabled selected>YYYY</option>';
+      for (let y = currentYear; y >= 1900; y--) {
+        dobYearInput.add(new Option(y, y));
+      }
+
+      if (!isNaN(selectedYear) && selectedYear <= currentYear) {
+        dobYearInput.value = selectedYear;
+      }
+    }
+
+    function updateDobMonthOptions() {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth() + 1;
+
+      const selectedYear = parseInt(dobYearInput.value, 10);
+      const selectedMonth = parseInt(dobMonthInput.value, 10);
+
+      dobMonthInput.innerHTML = '<option value="" disabled selected>MM</option>';
+
+      let maxMonth = 12;
+      if (selectedYear === currentYear) {
+        maxMonth = currentMonth;
+      }
+
+      monthNames.forEach((month, index) => {
+        const mVal = index + 1;
+        if (mVal <= maxMonth) {
+          dobMonthInput.add(new Option(`${mVal} - ${month.substring(0, 3)}`, mVal));
+        }
+      });
+
+      if (!isNaN(selectedMonth) && selectedMonth <= maxMonth) {
+        dobMonthInput.value = selectedMonth;
+      } else if (!isNaN(selectedMonth)) {
+        dobMonthInput.selectedIndex = 0;
+      }
+    }
+
+    function updateDobDayOptions() {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth() + 1;
+      const currentDay = today.getDate();
+
+      const selectedYear = parseInt(dobYearInput.value, 10);
+      const selectedMonth = parseInt(dobMonthInput.value, 10);
+      const selectedDay = parseInt(dobDayInput.value, 10);
+
+      dobDayInput.innerHTML = '<option value="" disabled selected>DD</option>';
+
+      let maxDay = 31;
+      if (!isNaN(selectedYear) && !isNaN(selectedMonth)) {
+        maxDay = new Date(selectedYear, selectedMonth, 0).getDate();
+      }
+
+      if (selectedYear === currentYear && selectedMonth === currentMonth) {
+        maxDay = Math.min(maxDay, currentDay);
+      }
+
+      for (let d = 1; d <= maxDay; d++) {
+        dobDayInput.add(new Option(d, d));
+      }
+
+      if (!isNaN(selectedDay) && selectedDay <= maxDay) {
+        dobDayInput.value = selectedDay;
+      } else if (!isNaN(selectedDay)) {
+        dobDayInput.selectedIndex = 0;
+      }
+    }
+
+    function updateTargetOptions() {
+      const selectedDobYear = parseInt(dobYearInput.value, 10);
+      const selectedDobMonth = parseInt(dobMonthInput.value, 10);
+      const selectedDobDay = parseInt(dobDayInput.value, 10);
+
+      const currentTargetYear = parseInt(targetYearInput.value, 10);
+      const currentTargetMonth = parseInt(targetMonthInput.value, 10);
+      const currentTargetDay = parseInt(targetDayInput.value, 10);
+
+      const minYear = !isNaN(selectedDobYear) ? selectedDobYear : 1900;
+      targetYearInput.innerHTML = '<option value="" disabled selected>YYYY</option>';
+      for (let y = 2099; y >= minYear; y--) {
+        targetYearInput.add(new Option(y, y));
+      }
+      if (!isNaN(currentTargetYear) && currentTargetYear >= minYear) {
+        targetYearInput.value = currentTargetYear;
+      }
+
+      const activeTargetYear = parseInt(targetYearInput.value, 10);
+      const minMonth = (!isNaN(selectedDobYear) && activeTargetYear === selectedDobYear && !isNaN(selectedDobMonth)) ? selectedDobMonth : 1;
+      
+      targetMonthInput.innerHTML = '<option value="" disabled selected>MM</option>';
+      monthNames.forEach((month, index) => {
+        const mVal = index + 1;
+        if (mVal >= minMonth) {
+          targetMonthInput.add(new Option(`${mVal} - ${month.substring(0,3)}`, mVal));
+        }
+      });
+      if (!isNaN(currentTargetMonth) && currentTargetMonth >= minMonth) {
+        targetMonthInput.value = currentTargetMonth;
+      }
+
+      const activeTargetMonth = parseInt(targetMonthInput.value, 10);
+      const minDay = (!isNaN(selectedDobYear) && activeTargetYear === selectedDobYear && !isNaN(selectedDobMonth) && activeTargetMonth === selectedDobMonth && !isNaN(selectedDobDay)) ? selectedDobDay : 1;
+
+      targetDayInput.innerHTML = '<option value="" disabled selected>DD</option>';
+      for (let d = minDay; d <= 31; d++) {
+        targetDayInput.add(new Option(d, d));
+      }
+      if (!isNaN(currentTargetDay) && currentTargetDay >= minDay) {
+        targetDayInput.value = currentTargetDay;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      populateDropdowns();
+      setTargetDateToToday();
+
+      updateLiveClock();
+      setInterval(updateLiveClock, 1000);
+
+      ageForm.addEventListener('submit', calculateAge);
+
+      toggleCustomTargetBtn.addEventListener('click', toggleCustomTargetBoxes);
+
+      dobYearInput.addEventListener('change', () => {
+        updateDobMonthOptions();
+        updateDobDayOptions();
+        updateTargetOptions();
+        if (hasValidDOBInputs() && hasValidTargetInputs()) calculateAge();
+      });
+
+      dobMonthInput.addEventListener('change', () => {
+        updateDobDayOptions();
+        updateTargetOptions();
+        if (hasValidDOBInputs() && hasValidTargetInputs()) calculateAge();
+      });
+
+      dobDayInput.addEventListener('change', () => {
+        updateTargetOptions();
+        if (hasValidDOBInputs() && hasValidTargetInputs()) calculateAge();
+      });
+
+      [targetDayInput, targetMonthInput, targetYearInput].forEach(el => {
+        el.addEventListener('change', () => {
+          checkIfTargetIsToday();
+          updateTargetOptions();
+          if (hasValidDOBInputs() && hasValidTargetInputs()) calculateAge();
+        });
+      });
+
+      clearBtn.addEventListener('click', clearAllFields);
+      themeToggleBtn.addEventListener('click', toggleTheme);
+    });
+
+    function toggleCustomTargetBoxes() {
+      if (targetDateBoxes.classList.contains('hidden')) {
+        targetDateBoxes.classList.remove('hidden');
+        customBtnIcon.classList.add('rotate-180');
+      } else {
+        targetDateBoxes.classList.add('hidden');
+        customBtnIcon.classList.remove('rotate-180');
+        setTargetDateToToday();
+      }
+    }
+
+    function updateLiveClock() {
+      const now = new Date();
+      liveTimeEl.textContent = now.toLocaleTimeString();
+    }
+
+    function setTargetDateToToday() {
+      const today = new Date();
+      
+      targetYearInput.value = today.getFullYear();
+      targetMonthInput.value = today.getMonth() + 1;
+      targetDayInput.value = today.getDate();
+
+      updateTargetOptions();
+
+      targetYearInput.value = today.getFullYear();
+      targetMonthInput.value = today.getMonth() + 1;
+      targetDayInput.value = today.getDate();
+
+      checkIfTargetIsToday();
+      
+      if (hasValidDOBInputs()) calculateAge();
+    }
+
+    function checkIfTargetIsToday() {
+      const today = new Date();
+      const td = parseInt(targetDayInput.value, 10);
+      const tm = parseInt(targetMonthInput.value, 10);
+      const ty = parseInt(targetYearInput.value, 10);
+
+      if (
+        td === today.getDate() &&
+        tm === (today.getMonth() + 1) &&
+        ty === today.getFullYear()
+      ) {
+        targetTodayBadge.textContent = "(Today)";
+      } else {
+        targetTodayBadge.textContent = `(${td}/${tm}/${ty})`;
+      }
+    }
+
+    function hasValidDOBInputs() {
+      return dobDayInput.value !== "" && dobMonthInput.value !== "" && dobYearInput.value !== "";
+    }
+
+    function hasValidTargetInputs() {
+      return targetDayInput.value !== "" && targetMonthInput.value !== "" && targetYearInput.value !== "";
+    }
+
+    function setSampleDOB(day, month, year) {
+      dobYearInput.value = year;
+      updateDobMonthOptions();
+      dobMonthInput.value = month;
+      updateDobDayOptions();
+      dobDayInput.value = day;
+
+      updateTargetOptions();
+      calculateAge();
+    }
+
+    function clearAllFields() {
+      dobYearInput.selectedIndex = 0;
+      updateDobMonthOptions();
+      updateDobDayOptions();
+      setTargetDateToToday();
+      
+      if (!targetDateBoxes.classList.contains('hidden')) {
+        toggleCustomTargetBoxes();
+      }
+
+      hideError();
+      resetDisplayValues();
+    }
+
+    function showError(msg) {
+      errorText.textContent = msg;
+      errorMessage.classList.remove('hidden');
+    }
+
+    function hideError() {
+      errorMessage.classList.add('hidden');
+    }
+
+    function toggleTheme() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        themeIcon.className = 'fa-solid fa-sun text-amber-500';
+      } else {
+        document.documentElement.classList.add('dark');
+        themeIcon.className = 'fa-solid fa-moon text-slate-200';
+      }
+    }
+
+    function animateNumber(element, finalValue, duration = 600) {
+      if (isNaN(finalValue)) {
+        element.textContent = '--';
+        return;
+      }
+      const startValue = 0;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentNumber = Math.floor(startValue + (finalValue - startValue) * easeOut);
+
+        element.textContent = currentNumber.toLocaleString();
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          element.textContent = finalValue.toLocaleString();
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    const zodiacData = [
+      { name: "Capricorn", symbol: "♑", range: "Dec 22 - Jan 19", startMonth: 12, startDay: 22, endMonth: 1, endDay: 19 },
+      { name: "Aquarius", symbol: "♒", range: "Jan 20 - Feb 18", startMonth: 1, startDay: 20, endMonth: 2, endDay: 18 },
+      { name: "Pisces", symbol: "♓", range: "Feb 19 - Mar 20", startMonth: 2, startDay: 19, endMonth: 3, endDay: 20 },
+      { name: "Aries", symbol: "♈", range: "Mar 21 - Apr 19", startMonth: 3, startDay: 21, endMonth: 4, endDay: 19 },
+      { name: "Taurus", symbol: "♉", range: "Apr 20 - May 20", startMonth: 4, startDay: 20, endMonth: 5, endDay: 20 },
+      { name: "Gemini", symbol: "♊", range: "May 21 - Jun 20", startMonth: 5, startDay: 21, endMonth: 6, endDay: 20 },
+      { name: "Cancer", symbol: "♋", range: "Jun 21 - Jul 22", startMonth: 6, startDay: 21, endMonth: 7, endDay: 22 },
+      { name: "Leo", symbol: "♌", range: "Jul 23 - Aug 22", startMonth: 7, startDay: 23, endMonth: 8, endDay: 22 },
+      { name: "Virgo", symbol: "♍", range: "Aug 23 - Sep 22", startMonth: 8, startDay: 23, endMonth: 9, endDay: 22 },
+      { name: "Libra", symbol: "♎", range: "Sep 23 - Oct 22", startMonth: 9, startDay: 23, endMonth: 10, endDay: 22 },
+      { name: "Scorpio", symbol: "♏", range: "Oct 23 - Nov 21", startMonth: 10, startDay: 23, endMonth: 11, endDay: 21 },
+      { name: "Sagittarius", symbol: "♐", range: "Nov 22 - Dec 21", startMonth: 11, startDay: 22, endMonth: 12, endDay: 21 }
+    ];
+
+    function getZodiacSign(month, day) {
+      for (let sign of zodiacData) {
+        if (
+          (month === sign.startMonth && day >= sign.startDay) ||
+          (month === sign.endMonth && day <= sign.endDay)
+        ) {
+          return sign;
+        }
+      }
+      return zodiacData[0];
+    }
+
+    function calculateAge() {
+      hideError();
+
+      const bDay = parseInt(dobDayInput.value, 10);
+      const bMonth = parseInt(dobMonthInput.value, 10);
+      const bYear = parseInt(dobYearInput.value, 10);
+
+      const tDay = parseInt(targetDayInput.value, 10);
+      const tMonth = parseInt(targetMonthInput.value, 10);
+      const tYear = parseInt(targetYearInput.value, 10);
+
+      if (isNaN(bDay) || isNaN(bMonth) || isNaN(bYear)) {
+        showError("Please select Day, Month, and Year of Birth!");
+        return;
+      }
+
+      if (isNaN(tDay) || isNaN(tMonth) || isNaN(tYear)) {
+        showError("Please select Target Date fields!");
+        return;
+      }
+
+      const dob = new Date(bYear, bMonth - 1, bDay);
+      if (dob.getFullYear() !== bYear || dob.getMonth() !== bMonth - 1 || dob.getDate() !== bDay) {
+        showError("Invalid Birth Date! Selected month doesn't have that many days.");
+        return;
+      }
+
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (dob > today) {
+        showError("Date of Birth aaj ki date se aage nahi ho sakti!");
+        resetDisplayValues();
+        return;
+      }
+
+      const target = new Date(tYear, tMonth - 1, tDay);
+      if (target.getFullYear() !== tYear || target.getMonth() !== tMonth - 1 || target.getDate() !== tDay) {
+        showError("Invalid Target Date! Check calendar days.");
+        return;
+      }
+
+      if (dob > target) {
+        showError("Target date DOB se pehle nahi ho sakti!");
+        resetDisplayValues();
+        return;
+      }
+
+      const dayOfWeekName = weekDays[dob.getDay()];
+
+      dayNameDisplay.textContent = dayOfWeekName;
+
+      let years = tYear - bYear;
+      let months = (tMonth - 1) - (bMonth - 1);
+      let days = tDay - bDay;
+
+      if (days < 0) {
+        months--;
+        const prevMonthDays = new Date(tYear, tMonth - 1, 0).getDate();
+        days += prevMonthDays;
+      }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      animateNumber(yearsVal, years);
+      animateNumber(monthsVal, months);
+      animateNumber(daysVal, days);
+      summaryBadge.classList.remove('hidden');
+
+      const diffTime = Math.abs(target - dob);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const diffWeeks = Math.floor(diffDays / 7);
+      const diffMonths = (years * 12) + months;
+      const diffHours = diffDays * 24;
+      const diffMinutes = diffHours * 60;
+      let diffSeconds = diffMinutes * 60;
+
+      animateNumber(totalMonthsEl, diffMonths);
+      animateNumber(totalWeeksEl, diffWeeks);
+      animateNumber(totalDaysEl, diffDays);
+      animateNumber(totalHoursEl, diffHours);
+      animateNumber(totalMinutesEl, diffMinutes);
+
+      if (secondsTimer) clearInterval(secondsTimer);
+      liveSecondsCount = diffSeconds;
+      totalSecondsEl.textContent = liveSecondsCount.toLocaleString();
+
+      const now = new Date();
+      if (
+        tDay === now.getDate() &&
+        tMonth === (now.getMonth() + 1) &&
+        tYear === now.getFullYear()
+      ) {
+        secondsTimer = setInterval(() => {
+          liveSecondsCount++;
+          totalSecondsEl.textContent = liveSecondsCount.toLocaleString();
+        }, 1000);
+      }
+
+      calculateNextBirthday(dob, target);
+
+      const sign = getZodiacSign(bMonth, bDay);
+      zodiacName.textContent = sign.name;
+      zodiacIcon.textContent = sign.symbol;
+      zodiacDateRange.textContent = sign.range;
+    }
+
+    function calculateNextBirthday(dob, target) {
+      const currentYear = target.getFullYear();
+      let nextBday = new Date(currentYear, dob.getMonth(), dob.getDate());
+
+      if (nextBday < target) {
+        nextBday.setFullYear(currentYear + 1);
+      }
+
+      nextBdayDayOfWeek.textContent = weekDays[nextBday.getDay()];
+
+      let monthDiff = nextBday.getMonth() - target.getMonth();
+      let dayDiff = nextBday.getDate() - target.getDate();
+
+      if (dayDiff < 0) {
+        monthDiff--;
+        const prevMonth = new Date(nextBday.getFullYear(), nextBday.getMonth(), 0);
+        dayDiff += prevMonth.getDate();
+      }
+
+      if (monthDiff < 0) {
+        monthDiff += 12;
+      }
+
+      const totalBdayDiffDays = Math.ceil((nextBday - target) / (1000 * 60 * 60 * 24));
+      const percentagePassed = Math.max(0, Math.min(100, ((365 - totalBdayDiffDays) / 365) * 100));
+      nextBdayProgress.style.width = `${percentagePassed}%`;
+
+      if (monthDiff === 0 && dayDiff === 0) {
+        nextBdayText.textContent = "🎉 Happy Birthday Today!";
+        nextBdayCount.textContent = "0 Mo 0 Days";
+        nextBdayProgress.style.width = "100%";
+      } else {
+        const nextAge = target.getFullYear() - dob.getFullYear() + (nextBday.getFullYear() > target.getFullYear() ? 1 : 0);
+        nextBdayText.textContent = `Turns ${nextAge} years old on:`;
+        nextBdayCount.textContent = `${monthDiff} Mo ${dayDiff} Days left`;
+      }
+    }
+
+    function resetDisplayValues() {
+      dayNameDisplay.textContent = '--';
+      yearsVal.textContent = '--';
+      monthsVal.textContent = '--';
+      daysVal.textContent = '--';
+      summaryBadge.classList.add('hidden');
+
+      totalMonthsEl.textContent = '--';
+      totalWeeksEl.textContent = '--';
+      totalDaysEl.textContent = '--';
+      totalHoursEl.textContent = '--';
+      totalMinutesEl.textContent = '--';
+      totalSecondsEl.textContent = '--';
+
+      nextBdayText.textContent = 'Calculated on date selection';
+      nextBdayCount.textContent = '-- Mo -- Days';
+      nextBdayDayOfWeek.textContent = '---';
+      nextBdayProgress.style.width = '0%';
+
+      zodiacName.textContent = '---';
+      zodiacIcon.textContent = '✨';
+      zodiacDateRange.textContent = 'Select Date of Birth';
+
+      if (secondsTimer) clearInterval(secondsTimer);
+    }
+  </script>
+
+  <!-- Custom dropdown layer: must stay AFTER the main script -->
+  <script>
+  (function () {
+    const ids = ['dobDay','dobMonth','dobYear','targetDay','targetMonth','targetYear'];
+    const all = [];
+    const vd = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+    const sd = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'selectedIndex');
+
+    ids.forEach(id => {
+      const sel = document.getElementById(id);
+      sel.parentElement.classList.add('relative');
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = sel.className + ' flex items-center justify-center';
+      sel.classList.add('cdd-native');
+      sel.tabIndex = -1;
+      sel.parentElement.appendChild(btn);
+
+      const panel = document.createElement('ul');
+      panel.className = 'cdd-panel hidden rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl py-1 text-center text-slate-800 dark:text-white';
+      document.body.appendChild(panel);
+
+      function refresh() {
+        const cur = sel.options[sel.selectedIndex];
+        btn.textContent = cur ? cur.text : (sel.options[0] ? sel.options[0].text : '');
+        panel.innerHTML = '';
+        Array.from(sel.options).forEach(opt => {
+          if (opt.disabled) return;
+          const li = document.createElement('li');
+          li.textContent = opt.text;
+          li.className = 'px-2 py-2 text-sm font-bold cursor-pointer hover:bg-indigo-500/20 ' +
+            (opt.selected ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' : '');
+          li.addEventListener('click', () => {
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            close();
+          });
+          panel.appendChild(li);
+        });
+      }
+
+      function open() {
+        closeAll(api);
+        refresh();
+        panel.classList.remove('hidden');
+        const r = btn.getBoundingClientRect();
+        const w = Math.max(r.width, 90);
+        const below = window.innerHeight - r.bottom - 12;
+        const above = r.top - 12;
+        const h = Math.min(200, panel.scrollHeight);
+        const up = below < h && above > below;
+        panel.style.maxHeight = Math.min(200, up ? above : below) + 'px';
+        panel.style.width = w + 'px';
+        panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
+        panel.style.top = up ? (r.top - Math.min(h, above) - 4) + 'px' : (r.bottom + 4) + 'px';
+        const active = panel.querySelector('.bg-indigo-500\\/20');
+        if (active) panel.scrollTop = active.offsetTop - 60;
+      }
+
+      function close() { panel.classList.add('hidden'); }
+
+      const api = { close, panel, btn };
+      all.push(api);
+
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        panel.classList.contains('hidden') ? open() : close();
+      });
+
+      Object.defineProperty(sel, 'value', {
+        get() { return vd.get.call(sel); },
+        set(v) { vd.set.call(sel, v); refresh(); },
+        configurable: true
+      });
+      Object.defineProperty(sel, 'selectedIndex', {
+        get() { return sd.get.call(sel); },
+        set(v) { sd.set.call(sel, v); refresh(); },
+        configurable: true
+      });
+
+      new MutationObserver(refresh).observe(sel, { childList: true });
+      refresh();
+    });
+
+    function closeAll(except) { all.forEach(a => { if (a !== except) a.close(); }); }
+    document.addEventListener('click', e => {
+      if (!all.some(a => a.panel.contains(e.target))) closeAll();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+    window.addEventListener('scroll', () => closeAll());
+    window.addEventListener('resize', () => closeAll());
+  })();
+  </script>
+</body>
+</html>
