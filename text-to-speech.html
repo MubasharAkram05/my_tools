@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Say It — Text to Voice</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#12141c;
+    --panel:#1a1d29;
+    --panel-raised:#20232f;
+    --amber:#e8a33d;
+    --teal:#4fd1c5;
+    --text:#ede9e0;
+    --muted:#8890a0;
+    --line:#2b2f3d;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(232,163,61,0.10), transparent),
+      radial-gradient(ellipse 700px 500px at 100% 110%, rgba(79,209,197,0.08), transparent),
+      var(--ink);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+  }
+
+  .card{
+    width:100%;
+    max-width:640px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:36px 36px 30px;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,0.6);
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 6px;
+  }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:32px;
+    line-height:1.1;
+    margin:0 0 22px;
+    color:var(--text);
+  }
+
+  /* Signature element: waveform */
+  .waveform{
+    height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    margin-bottom:26px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:var(--panel-raised);
+  }
+  .waveform span{
+    width:4px;
+    border-radius:2px;
+    background:var(--muted);
+    height:8px;
+    transition:background 0.3s ease;
+  }
+  .waveform.active span{
+    background:var(--teal);
+    animation:bounce 900ms ease-in-out infinite;
+  }
+  .waveform.active span:nth-child(odd){ animation-duration:700ms; }
+  .waveform.active span:nth-child(3n){ animation-duration:1100ms; background:var(--amber); }
+  @keyframes bounce{
+    0%,100%{ height:8px; }
+    50%{ height:34px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .waveform.active span{ animation:none; height:24px; }
+  }
+
+  textarea{
+    width:100%;
+    min-height:130px;
+    resize:vertical;
+    background:var(--panel-raised);
+    border:1px solid var(--line);
+    border-radius:12px;
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    padding:14px 16px;
+    outline:none;
+  }
+  textarea:focus{ border-color:var(--amber); }
+  textarea::placeholder{ color:var(--muted); }
+
+  .charcount{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--muted);
+    text-align:right;
+    margin:6px 2px 20px;
+  }
+
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:18px;
+  }
+
+  label{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:8px;
+    letter-spacing:0.02em;
+  }
+  label .val{
+    font-family:'JetBrains Mono', monospace;
+    color:var(--teal);
+  }
+
+  select{
+    width:100%;
+    background:var(--panel-raised);
+    border:1px solid var(--line);
+    color:var(--text);
+    border-radius:10px;
+    padding:10px 12px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    outline:none;
+  }
+  select:focus{ border-color:var(--amber); }
+
+  input[type=range]{
+    width:100%;
+    accent-color:var(--amber);
+    height:4px;
+  }
+
+  .controls-full{ margin-bottom:22px; }
+
+  .buttons{
+    display:flex;
+    gap:10px;
+    margin-top:8px;
+  }
+
+  button{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    border:none;
+    border-radius:10px;
+    padding:12px 18px;
+    cursor:pointer;
+    transition:transform 0.15s ease, opacity 0.15s ease;
+  }
+  button:active{ transform:scale(0.97); }
+  button:disabled{ opacity:0.35; cursor:not-allowed; }
+
+  .btn-primary{
+    background:var(--amber);
+    color:#1a1200;
+    flex:1;
+  }
+  .btn-secondary{
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--line);
+  }
+  .btn-secondary:hover:not(:disabled){ border-color:var(--muted); }
+
+  .status{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:16px;
+    min-height:16px;
+  }
+
+  :focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <p class="eyebrow">Web speech synthesis</p>
+  <h1>Type it. Hear it back.</h1>
+
+  <div class="waveform" id="waveform">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <textarea id="text" placeholder="Paste or type what you want read aloud…">Hello! This is a text to voice generator running entirely in your browser.</textarea>
+  <div class="charcount"><span id="charcount">0</span> characters</div>
+
+  <div class="row">
+    <div>
+      <label for="voice">Voice</label>
+      <select id="voice"></select>
+    </div>
+    <div>
+      <label for="rate">Rate <span class="val" id="rateVal">1.0</span></label>
+      <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
+    </div>
+  </div>
+
+  <div class="row controls-full">
+    <div>
+      <label for="pitch">Pitch <span class="val" id="pitchVal">1.0</span></label>
+      <input type="range" id="pitch" min="0" max="2" step="0.1" value="1">
+    </div>
+    <div>
+      <label for="volume">Volume <span class="val" id="volumeVal">1.0</span></label>
+      <input type="range" id="volume" min="0" max="1" step="0.05" value="1">
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button class="btn-primary" id="speakBtn">Speak</button>
+    <button class="btn-secondary" id="pauseBtn" disabled>Pause</button>
+    <button class="btn-secondary" id="stopBtn" disabled>Stop</button>
+  </div>
+
+  <p class="status" id="status"></p>
+</div>
+
+<script>
+  const synth = window.speechSynthesis;
+  const textEl = document.getElementById('text');
+  const voiceEl = document.getElementById('voice');
+  const rateEl = document.getElementById('rate');
+  const pitchEl = document.getElementById('pitch');
+  const volumeEl = document.getElementById('volume');
+  const rateVal = document.getElementById('rateVal');
+  const pitchVal = document.getElementById('pitchVal');
+  const volumeVal = document.getElementById('volumeVal');
+  const speakBtn = document.getElementById('speakBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const statusEl = document.getElementById('status');
+  const charcountEl = document.getElementById('charcount');
+  const waveform = document.getElementById('waveform');
+
+  let voices = [];
+
+  function updateCharCount(){
+    charcountEl.textContent = textEl.value.length;
+  }
+  textEl.addEventListener('input', updateCharCount);
+  updateCharCount();
+
+  rateEl.addEventListener('input', () => rateVal.textContent = parseFloat(rateEl.value).toFixed(1));
+  pitchEl.addEventListener('input', () => pitchVal.textContent = parseFloat(pitchEl.value).toFixed(1));
+  volumeEl.addEventListener('input', () => volumeVal.textContent = parseFloat(volumeEl.value).toFixed(2));
+
+  function populateVoices(){
+    voices = synth.getVoices();
+    voiceEl.innerHTML = '';
+    if(voices.length === 0){
+      const opt = document.createElement('option');
+      opt.textContent = 'No voices found';
+      voiceEl.appendChild(opt);
+      return;
+    }
+    voices.forEach((v, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `${v.name} (${v.lang})${v.default ? ' — default' : ''}`;
+      voiceEl.appendChild(opt);
+    });
+  }
+
+  populateVoices();
+  if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = populateVoices;
+  }
+
+  function setSpeakingState(isSpeaking){
+    speakBtn.disabled = isSpeaking;
+    pauseBtn.disabled = !isSpeaking;
+    stopBtn.disabled = !isSpeaking;
+    waveform.classList.toggle('active', isSpeaking);
+  }
+
+  speakBtn.addEventListener('click', () => {
+    const text = textEl.value.trim();
+    if(!text){
+      statusEl.textContent = 'Type something first.';
+      return;
+    }
+    if(!('speechSynthesis' in window)){
+      statusEl.textContent = 'Speech synthesis is not supported in this browser.';
+      return;
+    }
+
+    synth.cancel(); // clear any queued speech
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const selectedVoice = voices[voiceEl.value];
+    if(selectedVoice) utterance.voice = selectedVoice;
+    utterance.rate = parseFloat(rateEl.value);
+    utterance.pitch = parseFloat(pitchEl.value);
+    utterance.volume = parseFloat(volumeEl.value);
+
+    utterance.onstart = () => {
+      setSpeakingState(true);
+      statusEl.textContent = 'Speaking…';
+    };
+    utterance.onend = () => {
+      setSpeakingState(false);
+      statusEl.textContent = 'Done.';
+    };
+    utterance.onerror = (e) => {
+      setSpeakingState(false);
+      statusEl.textContent = 'Something interrupted playback.';
+    };
+    utterance.onpause = () => { statusEl.textContent = 'Paused.'; };
+    utterance.onresume = () => { statusEl.textContent = 'Speaking…'; };
+
+    synth.speak(utterance);
+  });
+
+  pauseBtn.addEventListener('click', () => {
+    if(synth.speaking && !synth.paused){
+      synth.pause();
+      pauseBtn.textContent = 'Resume';
+    } else if(synth.paused){
+      synth.resume();
+      pauseBtn.textContent = 'Pause';
+    }
+  });
+
+  stopBtn.addEventListener('click', () => {
+    synth.cancel();
+    setSpeakingState(false);
+    pauseBtn.textContent = 'Pause';
+    statusEl.textContent = 'Stopped.';
+  });
+</script>
+
+</body>
+</html>
