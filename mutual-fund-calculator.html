@@ -627,87 +627,46 @@
 
   .count-anim { animation: countUp 0.4s ease both; }
 
-
-  /* ── Growth Timeline ── */
-  .timeline-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    overflow: hidden;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 16px rgba(91,110,245,0.08);
-  }
-  .timeline-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .timeline-year-row {
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .timeline-year-row:last-child { border-bottom: none; }
-  .timeline-year-row:hover { background: rgba(91,110,245,0.04); }
-  .year-summary {
-    display: grid;
-    grid-template-columns: 32px 1fr 1fr 1fr 1fr 20px;
+  /* Tax */
+  .switch-label {
+    display: flex;
     align-items: center;
-    padding: 12px 16px;
-    gap: 6px;
-  }
-  @media (max-width: 520px) {
-    .year-summary { grid-template-columns: 28px 1fr 1fr 1fr 18px; }
-    .ys-profit { display: none; }
-  }
-  .year-num {
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 600;
     font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--accent2);
-    background: rgba(155,142,248,0.13);
-    border-radius: 6px;
-    padding: 3px 2px;
-    text-align: center;
   }
-  .ys-label { font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif; color: var(--text); }
-  .ys-val   { font-size: 11px; color: var(--muted); }
-  .ys-profit { font-size: 12px; color: var(--accent); font-weight: 600; }
-  .ys-fv    { font-size: 13px; font-weight: 700; font-family: 'Syne', sans-serif; color: var(--text); }
-  .ys-chevron { font-size: 10px; color: var(--muted); transition: transform 0.25s; text-align: right; }
-  .timeline-year-row.open .ys-chevron { transform: rotate(180deg); }
-  .timeline-year-row.open { background: rgba(91,110,245,0.025); }
-
-  .month-table-wrap {
-    display: none;
-    border-top: 1px dashed var(--border);
-    background: rgba(91,110,245,0.015);
-    overflow-x: auto;
+  .switch-label input[type="checkbox"] {
+    width: 20px; height: 20px;
+    accent-color: var(--accent);
+    cursor: pointer;
   }
-  .timeline-year-row.open .month-table-wrap { display: block; }
-  .month-table { width: 100%; border-collapse: collapse; min-width: 380px; }
-  .month-table thead th {
-    padding: 7px 14px;
-    font-size: 10px;
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
     color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: rgba(91,110,245,0.04);
-    text-align: left;
-    white-space: nowrap;
+    margin-top: 26px;
   }
-  .month-table tbody tr { border-top: 1px solid rgba(91,110,245,0.06); }
-  .month-table tbody tr:hover { background: rgba(91,110,245,0.04); }
-  .month-table tbody td { padding: 8px 14px; font-size: 12px; color: var(--text); }
-  .month-table tbody td:first-child { color: var(--muted); font-weight: 600; font-size: 11px; font-family: 'Syne', sans-serif; }
-  .td-profit { color: var(--accent) !important; font-weight: 600; }
-  .td-return { color: var(--accent2) !important; font-weight: 600; }
-  .td-fv     { font-weight: 700 !important; font-family: 'Syne', sans-serif; }
+  .checkbox-row input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .tax-note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 12px;
+    line-height: 1.6;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+  }
 
   /* Disclaimer */
   .disclaimer {
@@ -790,6 +749,38 @@
     </div>
   </div>
 
+  <!-- Tax Card -->
+  <div class="card">
+    <div class="card-title">Tax</div>
+    <label class="switch-label">
+      <input type="checkbox" id="tax-enable" onchange="toggleTaxFields()">
+      <span>Include Capital Gains Tax</span>
+    </label>
+
+    <div id="tax-fields" style="display:none; margin-top:18px;">
+      <div class="slider-group" style="margin-top:4px;">
+        <div class="slider-label-row">
+          <label>Capital Gains Tax Rate</label>
+          <span class="slider-val" id="cgt-rate-display">15%</span>
+        </div>
+        <div class="slider-with-btns">
+          <button class="rate-btn" onclick="adjustTaxRate(-1)">−</button>
+          <input type="range" id="cgt-rate-slider" min="1" max="40" step="1" value="15"
+            oninput="document.getElementById('cgt-rate-display').textContent = this.value + '%'">
+          <button class="rate-btn" onclick="adjustTaxRate(1)">+</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-top:4px;">
+          <span>1% (Min)</span>
+          <span>40% (Max)</span>
+        </div>
+      </div>
+
+      <p class="tax-note" style="margin-top:16px;">
+        ℹ️ Standard CGT on mutual funds is 15% as per Finance Act 2025 (Tax Year 2026), same for filers and non-filers on units acquired after 1 July 2025. No CGT if holding period exceeds 6 years. Adjust the slider if your fund category, filer status, or acquisition date attracts a different rate. Tax laws change with each Finance Act — confirm current rates with your AMC before investing.
+      </p>
+    </div>
+  </div>
+
   <!-- Calculate Button -->
   <button class="calc-btn" onclick="calculate()">⚡ CALCULATE RETURNS</button>
 
@@ -823,6 +814,30 @@
         <div class="result-box-label">📊 Annual Rate</div>
         <div class="result-box-val" style="color:var(--accent2)" id="res-rate">—</div>
       </div>
+    </div>
+
+    <!-- Tax Breakdown -->
+    <div class="breakdown" id="tax-breakdown-section" style="display:none;">
+      <div class="breakdown-header">💸 Tax Impact (CGT)</div>
+      <div class="result-grid">
+        <div class="result-box">
+          <div class="result-box-label">📈 Gross Profit (before tax)</div>
+          <div class="result-box-val" id="tax-gross-profit">—</div>
+        </div>
+        <div class="result-box">
+          <div class="result-box-label">🏛 CGT Deducted</div>
+          <div class="result-box-val" style="color:var(--danger)" id="tax-cgt">—</div>
+        </div>
+        <div class="result-box">
+          <div class="result-box-label">✅ Net Profit (after tax)</div>
+          <div class="result-box-val profit" id="tax-net-profit">—</div>
+        </div>
+        <div class="result-box">
+          <div class="result-box-label">📉 Gross Value (before tax)</div>
+          <div class="result-box-val" id="tax-gross-value">—</div>
+        </div>
+      </div>
+      <p class="tax-note" id="tax-holding-note" style="margin-top:16px;"></p>
     </div>
 
     <!-- Daily Return Live Ticker -->
@@ -870,19 +885,10 @@
       </table>
     </div>
 
-    <!-- Growth Timeline Accordion -->
-    <div class="timeline-section" id="timeline-section">
-      <div class="timeline-header">&#128200; Growth Timeline &mdash; Year &amp; Month Detail</div>
-      <div id="timeline-body"></div>
-    </div>
-
-        <p class="disclaimer">
+    <p class="disclaimer">
       ⚠️ Estimates based on past returns. Actual results may vary. All investments subject to market risk.<br>
       Past performance is not a guarantee of future results. SECP regulated funds only.
     </p>
-  <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:10px; font-family:'Syne', sans-serif; letter-spacing:1px;">
-    Made by <span style="color:var(--accent); font-weight:700;">Mubashar Akram</span>
-  </p>
   </div>
 
 </div>
@@ -942,6 +948,19 @@
     return 'Rs. ' + Math.round(n).toLocaleString('en-PK');
   }
 
+  function adjustTaxRate(delta) {
+    const slider = document.getElementById('cgt-rate-slider');
+    let val = parseInt(slider.value) + delta;
+    val = Math.min(40, Math.max(1, val));
+    slider.value = val;
+    document.getElementById('cgt-rate-display').textContent = val + '%';
+  }
+
+  function toggleTaxFields() {
+    const enabled = document.getElementById('tax-enable').checked;
+    document.getElementById('tax-fields').style.display = enabled ? '' : 'none';
+  }
+
   function calculate() {
     const years = parseInt(document.getElementById('years').value) || 5;
     const rate = parseFloat(document.getElementById('rate-slider').value) / 100;
@@ -952,6 +971,12 @@
 
     const monthlyRate = rate / 12;
     const months = years * 12;
+
+    // Tax settings
+    const taxEnabled = document.getElementById('tax-enable').checked;
+    const cgtRate = taxEnabled ? (parseFloat(document.getElementById('cgt-rate-slider').value) || 15) / 100 : 0;
+    const holdingExempt = taxEnabled && years > 6;
+    const taxActive = taxEnabled && !holdingExempt;
 
     // SIP future value
     let sipFV = 0;
@@ -964,18 +989,38 @@
     // Lump sum future value
     const lumpFV = lump * Math.pow(1 + rate, years);
 
-    const totalFV = sipFV + lumpFV;
+    const grossTotalFV = sipFV + lumpFV;
     const totalInvested = (monthly * months) + lump;
-    const totalProfit = totalFV - totalInvested;
+    const grossProfit = grossTotalFV - totalInvested;
+
+    // Apply CGT to profit
+    const cgtAmount = (taxActive && grossProfit > 0) ? grossProfit * cgtRate : 0;
+    const netProfit = grossProfit - cgtAmount;
+    const totalFV = totalInvested + netProfit;
     const multiplier = totalFV / totalInvested;
 
-    // Update hero
+    // Update hero (post-tax figures)
     document.getElementById('res-total').textContent = fmt(totalFV);
     document.getElementById('res-years').textContent = years;
     document.getElementById('res-invested').textContent = fmt(totalInvested);
-    document.getElementById('res-profit').textContent = fmt(totalProfit);
+    document.getElementById('res-profit').textContent = fmt(netProfit);
     document.getElementById('res-multiplier').textContent = multiplier.toFixed(2) + 'x';
     document.getElementById('res-rate').textContent = (rate * 100).toFixed(2) + '% / yr';
+
+    // Tax breakdown section
+    const taxSection = document.getElementById('tax-breakdown-section');
+    if (taxEnabled) {
+      document.getElementById('tax-gross-profit').textContent = fmt(grossProfit);
+      document.getElementById('tax-cgt').textContent = cgtAmount > 0 ? '−' + fmt(cgtAmount) : fmt(0);
+      document.getElementById('tax-net-profit').textContent = fmt(netProfit);
+      document.getElementById('tax-gross-value').textContent = fmt(grossTotalFV);
+      document.getElementById('tax-holding-note').textContent = holdingExempt
+        ? `✅ Holding period is ${years} years (over 6 years) — CGT exempt as per current tax law.`
+        : `Held for ${years} year(s). CGT applied at ${(cgtRate*100).toFixed(0)}% since holding is under 6 years.`;
+      taxSection.style.display = '';
+    } else {
+      taxSection.style.display = 'none';
+    }
 
     // Daily/Weekly/Monthly/Yearly return — sirf One Time (lump) mode mein, hamesha 1 year ki FV pe
     const showReturns = currentMode === 'lump';
@@ -986,20 +1031,30 @@
       // 1 year ki FV use karo (chahe years > 1 ho)
       const oneyearFV = lump * Math.pow(1 + rate, 1);
       const dailyRate = Math.pow(1 + rate, 1 / 365) - 1;
-      const dailyReturn = oneyearFV * dailyRate;
-      const weeklyReturn = dailyReturn * 7;
-      const monthlyReturn = oneyearFV * (Math.pow(1 + rate, 1/12) - 1);
-      const yearlyReturn = oneyearFV * rate;
+      let dailyReturn = oneyearFV * dailyRate;
+      let weeklyReturn = dailyReturn * 7;
+      let monthlyReturn = oneyearFV * (Math.pow(1 + rate, 1/12) - 1);
+      let yearlyReturn = oneyearFV * rate;
       const dailyRatePct = (dailyRate * 100).toFixed(5);
+
+      // Apply CGT to these projected returns too (post-tax)
+      if (taxActive) {
+        dailyReturn *= (1 - cgtRate);
+        weeklyReturn *= (1 - cgtRate);
+        monthlyReturn *= (1 - cgtRate);
+        yearlyReturn *= (1 - cgtRate);
+      }
 
       document.getElementById('res-daily').textContent = fmtSmall(dailyReturn);
       document.getElementById('res-weekly').textContent = fmtSmall(weeklyReturn);
       document.getElementById('res-monthly-ret').textContent = fmtSmall(monthlyReturn);
       document.getElementById('res-yearly-ret').textContent = fmt(yearlyReturn);
-      document.getElementById('ticker-rate-info').textContent = `Daily Rate: ${dailyRatePct}% on ${fmt(oneyearFV)} (1st year)`;
+      document.getElementById('ticker-rate-info').textContent = taxEnabled
+        ? `Daily Rate: ${dailyRatePct}% on ${fmt(oneyearFV)} (1st year) — after ${holdingExempt ? '0% (exempt)' : (cgtRate*100).toFixed(0)+'% CGT'}`
+        : `Daily Rate: ${dailyRatePct}% on ${fmt(oneyearFV)} (1st year)`;
     }
 
-    // Year breakdown
+    // Year breakdown (post-tax values per year)
     const tbody = document.getElementById('breakdown-body');
     tbody.innerHTML = '';
     let maxVal = 0;
@@ -1015,12 +1070,20 @@
       }
       fv += lump * Math.pow(1 + rate, y);
       const inv = (monthly * m) + lump;
-      yearData.push({ y, fv, inv });
+
+      let profit = fv - inv;
+      if (taxEnabled) {
+        const yearExempt = y > 6;
+        const yearCgt = (!yearExempt && profit > 0) ? profit * cgtRate : 0;
+        profit = profit - yearCgt;
+        fv = inv + profit;
+      }
+
+      yearData.push({ y, fv, inv, profit });
       if (fv > maxVal) maxVal = fv;
     }
 
-    yearData.forEach(({ y, fv, inv }) => {
-      const profit = fv - inv;
+    yearData.forEach(({ y, fv, inv, profit }) => {
       const barW = Math.round((fv / maxVal) * 100);
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -1037,93 +1100,7 @@
       tbody.appendChild(tr);
     });
 
-    // ── Growth Timeline ──
-    const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const tlBody = document.getElementById('timeline-body');
-    tlBody.innerHTML = '';
-
-    for (let y = 1; y <= years; y++) {
-      // Year-end FV
-      const yM = y * 12;
-      let yFV = 0;
-      if (monthly > 0 && monthlyRate > 0)
-        yFV += monthly * ((Math.pow(1+monthlyRate, yM)-1) / monthlyRate) * (1+monthlyRate);
-      else if (monthly > 0) yFV += monthly * yM;
-      yFV += lump * Math.pow(1+rate, y);
-
-      const yInv    = (monthly * yM) + lump;
-      const yProfit = yFV - yInv;
-
-      // Year-start FV (for "this year earned" calc)
-      const yStartM = (y-1) * 12;
-      let yStartFV = lump;
-      if (y > 1) {
-        yStartFV = 0;
-        if (monthly > 0 && monthlyRate > 0)
-          yStartFV += monthly*((Math.pow(1+monthlyRate,yStartM)-1)/monthlyRate)*(1+monthlyRate);
-        else if (monthly > 0) yStartFV += monthly * yStartM;
-        yStartFV += lump * Math.pow(1+rate, y-1);
-      }
-      const yearEarned = yFV - yStartFV;
-
-      // Build 12 month rows
-      let monthRowsHTML = '';
-      for (let mo = 1; mo <= 12; mo++) {
-        const absM = (y-1)*12 + mo;
-        const prevM = absM - 1;
-
-        let mFV = 0;
-        if (monthly > 0 && monthlyRate > 0)
-          mFV += monthly*((Math.pow(1+monthlyRate,absM)-1)/monthlyRate)*(1+monthlyRate);
-        else if (monthly > 0) mFV += monthly * absM;
-        mFV += lump * Math.pow(1+monthlyRate, absM);
-
-        let prevFV = lump;
-        if (prevM > 0) {
-          prevFV = 0;
-          if (monthly > 0 && monthlyRate > 0)
-            prevFV += monthly*((Math.pow(1+monthlyRate,prevM)-1)/monthlyRate)*(1+monthlyRate);
-          else if (monthly > 0) prevFV += monthly * prevM;
-          prevFV += lump * Math.pow(1+monthlyRate, prevM);
-        }
-
-        const mInv    = (monthly * absM) + lump;
-        const mProfit = mFV - mInv;
-        const mReturn = mFV - prevFV;
-
-        monthRowsHTML += `<tr>
-          <td>${MONTH_NAMES[mo-1]}</td>
-          <td>${fmt(mInv)}</td>
-          <td class="td-fv">${fmt(mFV)}</td>
-          <td class="td-profit">+${fmt(mProfit)}</td>
-          <td class="td-return">+${fmtSmall(mReturn)}</td>
-        </tr>`;
-      }
-
-      const row = document.createElement('div');
-      row.className = 'timeline-year-row';
-      row.innerHTML = `
-        <div class="year-summary" onclick="this.parentElement.classList.toggle('open')">
-          <div class="year-num">Y${y}</div>
-          <div class="ys-label">Year ${y}</div>
-          <div class="ys-val">${fmt(yInv)} invested</div>
-          <div class="ys-profit">+${fmt(yProfit)}</div>
-          <div class="ys-fv">${fmt(yFV)}</div>
-          <div class="ys-chevron">&#9660;</div>
-        </div>
-        <div class="month-table-wrap">
-          <table class="month-table">
-            <thead><tr>
-              <th>Month</th><th>Total Invested</th><th>Portfolio Value</th>
-              <th>Net Profit</th><th>This Month Earned</th>
-            </tr></thead>
-            <tbody>${monthRowsHTML}</tbody>
-          </table>
-        </div>`;
-      tlBody.appendChild(row);
-    }
-
-        // Show results
+    // Show results
     const results = document.getElementById('results');
     results.classList.add('show');
     setTimeout(() => results.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
